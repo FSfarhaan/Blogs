@@ -9,7 +9,7 @@ export const siteConfig = {
   role: process.env.NEXT_PUBLIC_AUTHOR_ROLE ?? "Full-stack web and mobile app developer",
   intro:
     process.env.NEXT_PUBLIC_SITE_INTRO ??
-    "Writing about modern web engineering, clean systems, and the small decisions that make products feel great.",
+    "I write about building things that actually work. Modern web, AI, and the lessons you don’t learn in tutorials.",
   newsletterTitle: "Join the newsletter",
   newsletterDescription:
     "Get new posts in your inbox whenever a fresh article goes live.",
@@ -17,15 +17,15 @@ export const siteConfig = {
 
 export const navigationLinks = [
   { href: "/", label: "Home" },
-  { href: "/#blogs", label: "Blogs" },
+  { href: "/blogs", label: "Blogs" },
 ];
 
 export const categoryList = [
-  "React.js",
-  "TypeScript",
+  "Software",
   "Architecture",
-  "Developer Experience",
+  "AI",
+  "Practices",
+  "Personal",
   "College",
-  "OOPS",
-  "Tooling",
+  "Opinions",
 ];

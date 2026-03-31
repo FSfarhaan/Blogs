@@ -1,6 +1,7 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { getBlogContentByPageId } from "@/lib/notion-content-service";
-import { notion, NOTION_DATA_SOURCE_ID } from "@/lib/notion";
+import { notion, NOTION_DATA_SOURCE_ID, withNotionRetry } from "@/lib/notion";
 import {
   getHostedImageUrl,
   getNotionFileUrl,
@@ -49,6 +50,11 @@ type MultiSelectProperty = {
   multi_select: Array<{ name: string }>;
 };
 
+type FilesProperty = {
+  type: "files";
+  files: NotionFileObject[];
+};
+
 type SelectProperty = {
   type: "select";
   select: { name: string } | null;
@@ -72,6 +78,7 @@ type NotionProperty =
   | CheckboxProperty
   | DateProperty
   | MultiSelectProperty
+  | FilesProperty
   | SelectProperty
   | PeopleProperty
   | UnknownProperty;
@@ -87,6 +94,13 @@ type NotionIconObject =
 
 type DataSourceQueryParameters = Parameters<typeof notion.dataSources.query>[0];
 type DataSourceFilter = NonNullable<DataSourceQueryParameters["filter"]>;
+type QueryPublishedPostsOptions = {
+  cursor?: string;
+  filter?: DataSourceFilter;
+  limit?: number;
+};
+
+const BLOG_SUMMARY_REVALIDATE_SECONDS = 60 * 15;
 
 type NotionPage = {
   id: string;
@@ -106,6 +120,7 @@ export type BlogPostSummary = {
   publishedAt: string;
   updatedAt: string;
   coverImage: string | null;
+  thumbnailImage: string | null;
   icon: string | null;
   author: string;
   tags: string[];
@@ -115,6 +130,12 @@ export type BlogPostSummary = {
 export type BlogPost = BlogPostSummary & {
   readingTime: string;
   canonicalUrl: string;
+};
+
+export type BlogPostsPage = {
+  posts: BlogPostSummary[];
+  nextCursor: string | null;
+  hasMore: boolean;
 };
 
 function isTitleProperty(
@@ -155,6 +176,12 @@ function isMultiSelectProperty(
   property: NotionProperty | undefined,
 ): property is MultiSelectProperty {
   return property?.type === "multi_select" && Array.isArray(property.multi_select);
+}
+
+function isFilesProperty(
+  property: NotionProperty | undefined,
+): property is FilesProperty {
+  return property?.type === "files" && Array.isArray(property.files);
 }
 
 function isSelectProperty(
@@ -255,6 +282,27 @@ function getMultiSelectProperty(
   return [];
 }
 
+function getFilePropertyUrl(
+  properties: Record<string, NotionProperty>,
+  names: string[],
+) {
+  for (const name of names) {
+    const property = properties[name];
+
+    if (!isFilesProperty(property)) {
+      continue;
+    }
+
+    const firstFile = property.files[0];
+
+    if (firstFile) {
+      return getNotionFileUrl(firstFile);
+    }
+  }
+
+  return null;
+}
+
 function getPeopleProperty(
   properties: Record<string, NotionProperty>,
   names: string[],
@@ -301,6 +349,49 @@ function getIconValue(icon?: NotionIconObject) {
   return null;
 }
 
+function getCloudinaryThumbnailUrl(url?: string | null) {
+  if (!url) {
+    return null;
+  }
+
+  const uploadMarker = "/upload/";
+  const markerIndex = url.indexOf(uploadMarker);
+
+  if (markerIndex === -1) {
+    return url;
+  }
+
+  return `${url.slice(0, markerIndex + uploadMarker.length)}f_auto,q_auto,c_fill,w_720,h_460/${url.slice(markerIndex + uploadMarker.length)}`;
+}
+
+async function getThumbnailImageFromProperties(
+  properties: Record<string, NotionProperty>,
+) {
+  const thumbnailUrl =
+    getFilePropertyUrl(properties, [
+      "Thumbnail",
+      "Card Image",
+      "CardImage",
+      "Preview Image",
+      "Featured Image",
+      "Cover Image",
+      "Image",
+    ]) ||
+    getPlainTextProperty(properties, [
+      "Thumbnail URL",
+      "Card Image URL",
+      "Preview Image URL",
+      "Image URL",
+    ]).trim();
+
+  if (!thumbnailUrl) {
+    return null;
+  }
+
+  const hostedThumbnailUrl = await getHostedImageUrl(thumbnailUrl);
+  return getCloudinaryThumbnailUrl(hostedThumbnailUrl);
+}
+
 async function mapPageToSummary(page: NotionPage): Promise<BlogPostSummary | null> {
   const slug = getPlainTextProperty(page.properties, ["Slug"]).trim();
   const title = getPlainTextProperty(page.properties, ["Title", "Name"]).trim();
@@ -308,6 +399,9 @@ async function mapPageToSummary(page: NotionPage): Promise<BlogPostSummary | nul
   if (!slug || !title) {
     return null;
   }
+
+  const coverImage = await getHostedImageUrl(getNotionFileUrl(page.cover));
+  const propertyThumbnailImage = await getThumbnailImageFromProperties(page.properties);
 
   return {
     id: page.id,
@@ -323,7 +417,8 @@ async function mapPageToSummary(page: NotionPage): Promise<BlogPostSummary | nul
       getDateProperty(page.properties, ["Date", "Published At", "Publish Date"]) ||
       page.created_time,
     updatedAt: page.last_edited_time,
-    coverImage: await getHostedImageUrl(getNotionFileUrl(page.cover)),
+    coverImage,
+    thumbnailImage: propertyThumbnailImage ?? getCloudinaryThumbnailUrl(coverImage),
     icon: getIconValue(page.icon),
     author:
       getPeopleProperty(page.properties, ["Author"]) ||
@@ -334,7 +429,8 @@ async function mapPageToSummary(page: NotionPage): Promise<BlogPostSummary | nul
   };
 }
 
-async function queryPublishedPosts(filter?: DataSourceFilter) {
+async function queryPublishedPosts(options: QueryPublishedPostsOptions = {}) {
+  const { cursor, filter, limit = 20 } = options;
   const baseFilter: DataSourceFilter = {
     property: "Published",
     checkbox: {
@@ -345,56 +441,162 @@ async function queryPublishedPosts(filter?: DataSourceFilter) {
     ? ({ and: [baseFilter, filter] } as DataSourceFilter)
     : baseFilter;
 
-  return notion.dataSources.query({
-    data_source_id: NOTION_DATA_SOURCE_ID,
-    filter: composedFilter,
-    sorts: [
-      {
-        property: "Date",
-        direction: "descending",
-      },
-    ],
-  });
+  return withNotionRetry(() =>
+    notion.dataSources.query({
+      data_source_id: NOTION_DATA_SOURCE_ID,
+      filter: composedFilter,
+      start_cursor: cursor,
+      page_size: limit,
+      sorts: [
+        {
+          property: "Date",
+          direction: "descending",
+        },
+      ],
+    }),
+  );
 }
 
-export const getPublishedPosts = cache(async () => {
-  const response = await queryPublishedPosts();
+async function fetchPublishedPostsPage(options: QueryPublishedPostsOptions = {}) {
+  const response = await queryPublishedPosts(options);
   const posts = await Promise.all(
     response.results.map((page) => mapPageToSummary(page as NotionPage)),
   );
 
-  return posts.filter((post): post is BlogPostSummary => Boolean(post));
+  return {
+    posts: posts.filter((post): post is BlogPostSummary => Boolean(post)),
+    nextCursor: response.next_cursor ?? null,
+    hasMore: response.has_more,
+  } satisfies BlogPostsPage;
+}
+
+const getCachedPublishedPostsPage = unstable_cache(
+  async (cursor?: string, filterKey?: string, limit = 20) => {
+    return fetchPublishedPostsPage({
+      cursor,
+      filter: filterKey ? (JSON.parse(filterKey) as DataSourceFilter) : undefined,
+      limit,
+    });
+  },
+  ["published-posts-page"],
+  {
+    revalidate: BLOG_SUMMARY_REVALIDATE_SECONDS,
+  },
+);
+
+export async function getPublishedPostsPage(options: QueryPublishedPostsOptions = {}) {
+  const filterKey = options.filter ? JSON.stringify(options.filter) : undefined;
+
+  return getCachedPublishedPostsPage(options.cursor, filterKey, options.limit ?? 20);
+}
+
+export async function getFreshPublishedPostsPage(
+  options: QueryPublishedPostsOptions = {},
+) {
+  return fetchPublishedPostsPage(options);
+}
+
+export const getPublishedPosts = cache(async () => {
+  const allPosts: BlogPostSummary[] = [];
+  let cursor: string | undefined;
+
+  do {
+    const page = await getPublishedPostsPage({
+      cursor,
+      limit: 50,
+    });
+
+    allPosts.push(...page.posts);
+    cursor = page.nextCursor ?? undefined;
+  } while (cursor);
+
+  return allPosts;
 });
+
+export async function getFreshPublishedPosts() {
+  const allPosts: BlogPostSummary[] = [];
+  let cursor: string | undefined;
+
+  do {
+    const page = await getFreshPublishedPostsPage({
+      cursor,
+      limit: 50,
+    });
+
+    allPosts.push(...page.posts);
+    cursor = page.nextCursor ?? undefined;
+  } while (cursor);
+
+  return allPosts;
+}
 
 export const getPosts = getPublishedPosts;
 
+export const getHomepagePosts = cache(async () => {
+  const [featuredPage, latestPage] = await Promise.all([
+    getPublishedPostsPage({
+      filter: {
+        property: "Featured",
+        checkbox: {
+          equals: true,
+        },
+      },
+      limit: 5,
+    }),
+    getPublishedPostsPage({
+      limit: 18,
+    }),
+  ]);
+
+  const mergedPosts = [...featuredPage.posts, ...latestPage.posts];
+  const uniquePosts = mergedPosts.filter(
+    (post, index, allPosts) =>
+      allPosts.findIndex((candidate) => candidate.id === post.id) === index,
+  );
+
+  return uniquePosts.slice(0, 18);
+});
+
+const getCachedPostBySlug = unstable_cache(
+  async (slug: string) => {
+    const response = await queryPublishedPosts({
+      limit: 1,
+      filter: {
+        property: "Slug",
+        rich_text: {
+          equals: slug,
+        },
+      },
+    });
+
+    const page = response.results[0] as NotionPage | undefined;
+
+    if (!page) {
+      return null;
+    }
+
+    const summary = await mapPageToSummary(page);
+
+    if (!summary) {
+      return null;
+    }
+
+    const content = await getBlogContentByPageId(summary.id, summary.updatedAt);
+
+    return {
+      ...summary,
+      readingTime: content.readingTime,
+      canonicalUrl: `${siteConfig.url}/blog/${summary.slug}`,
+    } satisfies BlogPost;
+  },
+  ["post-by-slug"],
+  {
+    revalidate: BLOG_SUMMARY_REVALIDATE_SECONDS,
+  },
+);
+
 export const getPostBySlug = cache(async (slug: string) => {
-  const response = await queryPublishedPosts({
-    property: "Slug",
-    rich_text: {
-      equals: slug,
-    },
-  });
-
-  const page = response.results[0] as NotionPage | undefined;
-
-  if (!page) {
-    return null;
-  }
-
-  const summary = await mapPageToSummary(page);
-
-  if (!summary) {
-    return null;
-  }
-
-  const content = await getBlogContentByPageId(summary.id);
-
-  return {
-    ...summary,
-    readingTime: content.readingTime,
-    canonicalUrl: `${siteConfig.url}/blog/${summary.slug}`,
-  } satisfies BlogPost;
+  return getCachedPostBySlug(slug);
 });
 
 export async function getRecentPosts(limit = 4, excludeSlug?: string) {
@@ -403,4 +605,49 @@ export async function getRecentPosts(limit = 4, excludeSlug?: string) {
   return posts
     .filter((post) => post.slug !== excludeSlug)
     .slice(0, limit);
+}
+
+export async function getRelatedPosts(options: {
+  slug: string;
+  tags: string[];
+  limit?: number;
+}) {
+  const { slug, tags, limit = 3 } = options;
+  const normalizedTags = new Set(tags.map((tag) => tag.trim().toLowerCase()));
+  const posts = await getPublishedPosts();
+
+  const scoredPosts = posts
+    .filter((post) => post.slug !== slug)
+    .map((post) => {
+      const score = post.tags.reduce((total, tag) => {
+        return total + (normalizedTags.has(tag.trim().toLowerCase()) ? 1 : 0);
+      }, 0);
+
+      return { post, score };
+    })
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+
+      return (
+        new Date(b.post.publishedAt).getTime() - new Date(a.post.publishedAt).getTime()
+      );
+    });
+
+  const matchedPosts = scoredPosts
+    .filter((entry) => entry.score > 0)
+    .map((entry) => entry.post)
+    .slice(0, limit);
+
+  if (matchedPosts.length >= limit) {
+    return matchedPosts;
+  }
+
+  const fallbackPosts = scoredPosts
+    .filter((entry) => entry.score === 0)
+    .map((entry) => entry.post)
+    .slice(0, limit - matchedPosts.length);
+
+  return [...matchedPosts, ...fallbackPosts];
 }

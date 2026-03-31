@@ -53,8 +53,8 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-[var(--page-background)] text-[var(--foreground)]">
         <GoogleAnalytics />
-        <div className="relative min-h-screen overflow-x-hidden">
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[34rem] bg-[radial-gradient(circle_at_top_left,rgba(239,109,67,0.18),transparent_38%),radial-gradient(circle_at_top_right,rgba(107,91,210,0.1),transparent_32%),linear-gradient(180deg,#fffaf4_0%,#f2e6db_52%,#f5eadf_100%)]" />
+        <div className="relative overflow-x-hidden">
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-full bg-[radial-gradient(circle_at_top_left,rgba(239,109,67,0.18),transparent_38%),radial-gradient(circle_at_top_right,rgba(107,91,210,0.1),transparent_32%),linear-gradient(180deg,#fffaf4_0%,#f2e6db_52%,#f5eadf_100%)]" />
           <Header />
           {children}
           <Footer />

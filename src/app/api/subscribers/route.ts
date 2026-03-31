@@ -1,16 +1,12 @@
 import { FieldValue } from "firebase-admin/firestore";
-import { getSubscribersCollection } from "@/lib/firebase";
+import { getSubscriberEmails, getSubscribersCollection } from "@/lib/firebase";
 import { isValidEmail } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const snapshot = await getSubscribersCollection().get();
-    const emails = snapshot.docs
-      .map((doc) => doc.data().email)
-      .filter((email): email is string => typeof email === "string")
-      .map((email) => email.trim().toLowerCase());
+    const emails = await getSubscriberEmails();
 
     return Response.json({ emails });
   } catch (error) {

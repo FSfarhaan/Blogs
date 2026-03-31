@@ -10,15 +10,16 @@
   },
   "dependencies": {
     "@notionhq/client": "^5.15.0",
+    "@sendgrid/mail": "^8.1.6",
     "cloudinary": "^2.9.0",
     "firebase-admin": "^13.7.0",
+    "mongodb": "^7.1.1",
     "next": "16.2.1",
     "notion-client": "^7.10.0",
     "notion-to-md": "^3.1.9",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-notion-x": "^7.10.0",
-    "resend": "^6.9.4"
+    "react-notion-x": "^7.10.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

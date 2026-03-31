@@ -1,6 +1,6 @@
-import { getPostBySlug } from "@/lib/blog";
+import { getPostBySlug } from "@/lib/blog-store";
 import { sendPublishedPostEmail } from "@/lib/email";
-import { getSubscribersCollection } from "@/lib/firebase";
+import { getSubscriberEmails } from "@/lib/firebase";
 
 export const runtime = "nodejs";
 
@@ -29,10 +29,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Post not found." }, { status: 404 });
     }
 
-    const snapshot = await getSubscribersCollection().get();
-    const recipients = snapshot.docs
-      .map((doc) => doc.data().email)
-      .filter((email): email is string => typeof email === "string");
+    const recipients = await getSubscriberEmails();
 
     const result = await sendPublishedPostEmail({
       recipients,

@@ -1,1 +1,1 @@
-export { getPosts } from "@/lib/blog";
+export { getPosts } from "@/lib/blog-store";

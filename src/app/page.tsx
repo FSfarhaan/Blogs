@@ -1,8 +1,10 @@
 import { HomePage } from "@/app/components/home-page";
-import { getPublishedPosts } from "@/lib/blog";
+import { getHomepagePosts } from "@/lib/blog-store";
+
+export const revalidate = 900;
 
 export default async function Home() {
-  const posts = await getPublishedPosts();
+  const posts = await getHomepagePosts();
 
   return <HomePage posts={posts} />;
 }

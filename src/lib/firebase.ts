@@ -40,3 +40,24 @@ export function getFirestoreDb() {
 export function getSubscribersCollection() {
   return getFirestoreDb().collection("subscribers");
 }
+
+export function getAdminOtpCollection() {
+  return getFirestoreDb().collection("adminOtps");
+}
+
+export function getPostNotificationCollection() {
+  return getFirestoreDb().collection("postNotifications");
+}
+
+export function getBlogContentCacheCollection() {
+  return getFirestoreDb().collection("blogContentCache");
+}
+
+export async function getSubscriberEmails() {
+  const snapshot = await getSubscribersCollection().get();
+
+  return snapshot.docs
+    .map((doc) => doc.data().email)
+    .filter((email): email is string => typeof email === "string")
+    .map((email) => email.trim().toLowerCase());
+}

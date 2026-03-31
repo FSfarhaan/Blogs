@@ -58,7 +58,8 @@ export function NotionContent({ content }: Props) {
               <img
                 src={block.url}
                 alt={block.alt}
-                className="h-auto w-full rounded-[1.75rem] border border-[var(--border)] object-cover shadow-[var(--shadow-soft)]"
+                loading="lazy"
+                className="h-auto md:w-2/3 rounded-[1.75rem] border border-[var(--border)] object-cover shadow-[var(--shadow-soft)]"
               />
               {block.caption ? (
                 <figcaption className="text-sm leading-6 text-[var(--muted)]">
@@ -92,7 +93,7 @@ export function NotionContent({ content }: Props) {
         return (
           <div
             key={key}
-            className="overflow-x-auto rounded-[1.75rem] border border-[var(--border)] bg-[#181412] px-5 py-4 text-sm text-[#f7efe7] shadow-[var(--shadow-soft)]"
+            className="overflow-x-auto rounded-[1.75rem] border border-[var(--border)] bg-[#181412] md:w-2/3 px-5 py-4 text-sm text-[#f7efe7] shadow-[var(--shadow-soft)]"
           >
             {block.caption ? (
               <p className="mb-3 text-xs uppercase tracking-[0.18em] text-[#d3b8a4]">

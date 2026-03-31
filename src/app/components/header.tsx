@@ -4,7 +4,7 @@ import { navigationLinks, siteConfig } from "@/lib/site-config";
 export function Header() {
   return (
     <header className="sticky top-0 z-40">
-      <div className="mx-auto max-w-7xl px-6 py-4 md:px-10">
+      <div className="mx-auto max-w-[90%] px-6 py-4 md:px-10">
         <div className="flex items-center justify-between rounded-full border border-[var(--border)] bg-[color:rgba(255,250,244,0.88)] px-4 py-3 shadow-[var(--shadow-soft)] md:px-6">
         <Link href="/" className="flex items-center gap-3">
           <span className="inline-flex h-12 w-12 items-center justify-center rounded-[1.35rem] bg-[var(--accent)] text-lg font-semibold text-white shadow-lg shadow-[color:rgba(212,87,47,0.3)]">

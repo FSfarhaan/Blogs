@@ -4,6 +4,24 @@ import { getRequiredEnv } from "@/lib/env";
 const uploadedImageCache = new Map<string, string>();
 let isConfigured = false;
 
+function getRemoteImageCacheKey(sourceUrl: string) {
+  try {
+    const url = new URL(sourceUrl);
+
+    if (
+      url.hostname.includes("amazonaws.com") ||
+      url.hostname.includes("notion-static.com")
+    ) {
+      return `${url.origin}${url.pathname}`;
+    }
+
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return sourceUrl;
+  }
+}
+
 function configureCloudinary() {
   if (isConfigured) {
     return cloudinary;
@@ -21,7 +39,7 @@ function configureCloudinary() {
 }
 
 export function getCachedCloudinaryUrl(sourceUrl: string) {
-  return uploadedImageCache.get(sourceUrl);
+  return uploadedImageCache.get(getRemoteImageCacheKey(sourceUrl));
 }
 
 export async function uploadRemoteImage(sourceUrl: string) {
@@ -37,7 +55,7 @@ export async function uploadRemoteImage(sourceUrl: string) {
     resource_type: "image",
   });
 
-  uploadedImageCache.set(sourceUrl, upload.secure_url);
+  uploadedImageCache.set(getRemoteImageCacheKey(sourceUrl), upload.secure_url);
 
   return upload.secure_url;
 }

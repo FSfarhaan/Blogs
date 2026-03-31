@@ -1,4 +1,7 @@
+import { unstable_cache } from "next/cache";
 import { uploadRemoteImage } from "@/lib/cloudinary";
+
+const HOSTED_IMAGE_REVALIDATE_SECONDS = 60 * 60 * 24 * 30;
 
 export type NotionFileObject =
   | { type: "external"; external: { url: string } }
@@ -51,10 +54,20 @@ export function getOriginalNotionImageUrl(url: string) {
   }
 }
 
+const getCachedHostedImageUrl = unstable_cache(
+  async (url: string) => {
+    return uploadRemoteImage(getOriginalNotionImageUrl(url));
+  },
+  ["notion-hosted-image"],
+  {
+    revalidate: HOSTED_IMAGE_REVALIDATE_SECONDS,
+  },
+);
+
 export async function getHostedImageUrl(url?: string | null) {
   if (!url) {
     return null;
   }
 
-  return uploadRemoteImage(getOriginalNotionImageUrl(url));
+  return getCachedHostedImageUrl(url);
 }

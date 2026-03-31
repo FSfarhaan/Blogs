@@ -4,13 +4,14 @@ import { notFound } from "next/navigation";
 import { NotionContent } from "@/app/components/notion-content";
 import { PostCard } from "@/app/components/post-card";
 import { SubscribeSection } from "@/app/components/subscribe-section";
-import { getPostBySlug, getPublishedPosts, getRecentPosts } from "@/lib/blog";
-import { getBlogContentByPageId } from "@/lib/notion-content-service";
+import { getPostBySlug, getPublishedPosts, getRelatedPosts } from "@/lib/blog-store";
 import { formatDate } from "@/lib/utils";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export const revalidate = 900;
 
 export async function generateStaticParams() {
   const posts = await getPublishedPosts();
@@ -44,13 +45,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt,
       authors: [post.author],
-      images: post.coverImage ? [{ url: post.coverImage }] : undefined,
+      images: post.coverImage
+        ? [{ url: post.coverImage }]
+        : post.thumbnailImage
+          ? [{ url: post.thumbnailImage }]
+          : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
-      images: post.coverImage ? [post.coverImage] : undefined,
+      images: post.coverImage
+        ? [post.coverImage]
+        : post.thumbnailImage
+          ? [post.thumbnailImage]
+          : undefined,
     },
   };
 }
@@ -63,21 +72,22 @@ export default async function BlogPostPage({ params }: PageProps) {
     notFound();
   }
 
-  const [recentPosts, content] = await Promise.all([
-    getRecentPosts(3, post.slug),
-    getBlogContentByPageId(post.id),
-  ]);
+  const relatedPosts = await getRelatedPosts({
+    slug: post.slug,
+    tags: post.tags,
+    limit: 3,
+  });
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-6 py-8 md:px-10 md:py-10">
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
+    <main className="mx-auto w-full max-w-[90%] px-6 py-8 md:px-10 md:py-10">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_18rem]">
         <article className="min-w-0">
           <div className="rounded-[2.25rem] border border-[var(--border)] bg-[linear-gradient(140deg,rgba(255,255,255,0.97),rgba(255,245,235,0.9),rgba(242,239,255,0.86))] p-8 shadow-[var(--shadow-soft)] md:p-10">
             <Link
               href="/"
               className="inline-flex text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
             >
-              Back to blog
+              Back to blogs
             </Link>
 
             <div className="mt-6 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -95,22 +105,29 @@ export default async function BlogPostPage({ params }: PageProps) {
               {post.description}
             </p>
 
-            {post.coverImage ? (
+            {/* {heroImage ? (
               <div className="mt-8 overflow-hidden rounded-[2rem] border border-white/70">
-                {/* eslint-disable-next-line @next/next/no-img-element -- Notion image URLs can be signed and time-bound, so we intentionally avoid image optimization here. */}
                 <img
-                  src={post.coverImage}
+                  src={heroImage}
                   alt={post.title}
                   className="h-auto w-full object-cover"
                 />
               </div>
-            ) : null}
-          </div>
+            ) : null} */}
 
-          <div className="mt-8 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] px-5 py-8 shadow-[var(--shadow-soft)] md:px-8 md:py-10">
-            <div className="mx-auto max-w-[48rem]">
-              <NotionContent content={content} />
+          
+            <div className="">
+              <NotionContent
+                content={{
+                  pageId: post.notionPageId,
+                  blocks: post.blocks,
+                  wordCount: post.wordCount,
+                  readingTime: post.readingTime,
+                  generatedAt: post.generatedAt,
+                }}
+              />
             </div>
+          
           </div>
 
           <div className="mt-8">
@@ -121,8 +138,8 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
         </article>
 
-        <aside className="space-y-6">
-          <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-soft)]">
+        <aside className="custom-scrollbar space-y-6 xl:sticky xl:top-6  xl:overflow-y-auto xl:pr-1">
+          <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 ">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
               Post details
             </p>
@@ -155,13 +172,13 @@ export default async function BlogPostPage({ params }: PageProps) {
             </div>
           </div>
 
-          {recentPosts.length ? (
+          {relatedPosts.length ? (
             <div className="space-y-4">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
-                Keep reading
+                Related posts
               </p>
-              {recentPosts.map((recentPost) => (
-                <PostCard key={recentPost.id} post={recentPost} priority="compact" />
+              {relatedPosts.map((relatedPost) => (
+                <PostCard key={relatedPost.id} post={relatedPost} priority="compact" />
               ))}
             </div>
           ) : null}

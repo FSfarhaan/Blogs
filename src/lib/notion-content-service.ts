@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+import { Timestamp } from "firebase-admin/firestore";
 import type {
   BlockObjectResponse,
   PartialBlockObjectResponse,
@@ -8,7 +10,8 @@ import type {
   BlogContentResponse,
   BlogHeadingBlock,
 } from "@/lib/blog-content";
-import { notion } from "@/lib/notion";
+import { getBlogContentCacheCollection } from "@/lib/firebase";
+import { notion, withNotionRetry } from "@/lib/notion";
 import { getHostedImageUrl, getNotionFileUrl } from "@/lib/notion-assets";
 
 type BlockNode = BlockObjectResponse & {
@@ -27,7 +30,15 @@ type PendingListItemBlock =
 
 type PendingBlogBlock = BlogContentBlock | PendingListItemBlock;
 
+type CachedBlogContentDocument = {
+  content: BlogContentResponse;
+  pageId: string;
+  processedAt: Timestamp;
+  updatedAt: string | null;
+};
+
 const CONTENT_CACHE_TTL_MS = 5 * 60 * 1000;
+const CONTENT_REVALIDATE_SECONDS = 60 * 60;
 const blogContentCache = new Map<
   string,
   {
@@ -35,6 +46,62 @@ const blogContentCache = new Map<
     response: Promise<BlogContentResponse> | BlogContentResponse;
   }
 >();
+
+function getContentCacheKey(pageId: string, updatedAt?: string) {
+  return `${pageId}:${updatedAt ?? "latest"}`;
+}
+
+async function getPersistedBlogContent(
+  pageId: string,
+  updatedAt?: string,
+): Promise<BlogContentResponse | null> {
+  const snapshot = await getBlogContentCacheCollection().doc(pageId).get();
+
+  if (!snapshot.exists) {
+    return null;
+  }
+
+  const data = snapshot.data() as CachedBlogContentDocument | undefined;
+
+  if (!data?.content) {
+    return null;
+  }
+
+  if (updatedAt && data.updatedAt && data.updatedAt !== updatedAt) {
+    return null;
+  }
+
+  return data.content;
+}
+
+async function persistBlogContent(
+  pageId: string,
+  updatedAt: string | undefined,
+  content: BlogContentResponse,
+) {
+  await getBlogContentCacheCollection().doc(pageId).set({
+    pageId,
+    updatedAt: updatedAt ?? null,
+    content: stripUndefinedDeep(content) as BlogContentResponse,
+    processedAt: Timestamp.now(),
+  } satisfies CachedBlogContentDocument);
+}
+
+function stripUndefinedDeep<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripUndefinedDeep(item)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([, entryValue]) => entryValue !== undefined)
+        .map(([entryKey, entryValue]) => [entryKey, stripUndefinedDeep(entryValue)]),
+    ) as T;
+  }
+
+  return value;
+}
 
 function isFullBlock(
   block: BlockObjectResponse | PartialBlockObjectResponse,
@@ -60,11 +127,13 @@ async function fetchBlockChildren(blockId: string): Promise<BlockNode[]> {
   let cursor: string | undefined;
 
   do {
-    const response = await notion.blocks.children.list({
-      block_id: blockId,
-      page_size: 100,
-      start_cursor: cursor,
-    });
+    const response = await withNotionRetry(() =>
+      notion.blocks.children.list({
+        block_id: blockId,
+        page_size: 100,
+        start_cursor: cursor,
+      }),
+    );
 
     blocks.push(...response.results.filter(isFullBlock));
     cursor = response.has_more ? response.next_cursor ?? undefined : undefined;
@@ -172,7 +241,7 @@ async function transformBlockNode(node: BlockNode): Promise<PendingBlogBlock[]> 
           type: "code",
           code,
           language: node.code.language,
-          caption: caption || undefined,
+          ...(caption ? { caption } : {}),
         });
       }
       break;
@@ -187,7 +256,7 @@ async function transformBlockNode(node: BlockNode): Promise<PendingBlogBlock[]> 
           type: "image",
           url: hostedUrl,
           alt: caption || "Blog image",
-          caption: caption || undefined,
+          ...(caption ? { caption } : {}),
         });
       }
       break;
@@ -196,8 +265,10 @@ async function transformBlockNode(node: BlockNode): Promise<PendingBlogBlock[]> 
       break;
   }
 
-  for (const child of node.children) {
-    blocks.push(...(await transformBlockNode(child)));
+  const childBlocks = await Promise.all(node.children.map((child) => transformBlockNode(child)));
+
+  for (const childBlockGroup of childBlocks) {
+    blocks.push(...childBlockGroup);
   }
 
   return blocks;
@@ -254,11 +325,10 @@ function groupListBlocks(blocks: PendingBlogBlock[]): BlogContentBlock[] {
 
 async function buildBlogContentResponse(pageId: string): Promise<BlogContentResponse> {
   const rootBlocks = await fetchBlockChildren(pageId);
-  const pendingBlocks: PendingBlogBlock[] = [];
-
-  for (const block of rootBlocks) {
-    pendingBlocks.push(...(await transformBlockNode(block)));
-  }
+  const transformedBlockGroups = await Promise.all(
+    rootBlocks.map((block) => transformBlockNode(block)),
+  );
+  const pendingBlocks = transformedBlockGroups.flat();
 
   const blocks = groupListBlocks(pendingBlocks);
   const wordCount = blocks.reduce((total, block) => {
@@ -290,16 +360,35 @@ async function buildBlogContentResponse(pageId: string): Promise<BlogContentResp
   };
 }
 
-export async function getBlogContentByPageId(pageId: string) {
+const getCachedBlogContentByPageId = unstable_cache(
+  async (pageId: string, updatedAt?: string) => {
+    const persistedContent = await getPersistedBlogContent(pageId, updatedAt);
+
+    if (persistedContent) {
+      return persistedContent;
+    }
+
+    const content = await buildBlogContentResponse(pageId);
+    await persistBlogContent(pageId, updatedAt, content);
+    return content;
+  },
+  ["blog-content"],
+  {
+    revalidate: CONTENT_REVALIDATE_SECONDS,
+  },
+);
+
+export async function getBlogContentByPageId(pageId: string, updatedAt?: string) {
   const now = Date.now();
-  const cachedEntry = blogContentCache.get(pageId);
+  const cacheKey = getContentCacheKey(pageId, updatedAt);
+  const cachedEntry = blogContentCache.get(cacheKey);
 
   if (cachedEntry && cachedEntry.expiresAt > now) {
     return await cachedEntry.response;
   }
 
-  const responsePromise = buildBlogContentResponse(pageId);
-  blogContentCache.set(pageId, {
+  const responsePromise = getCachedBlogContentByPageId(pageId, updatedAt);
+  blogContentCache.set(cacheKey, {
     expiresAt: now + CONTENT_CACHE_TTL_MS,
     response: responsePromise,
   });
@@ -307,14 +396,14 @@ export async function getBlogContentByPageId(pageId: string) {
   try {
     const response = await responsePromise;
 
-    blogContentCache.set(pageId, {
+    blogContentCache.set(cacheKey, {
       expiresAt: now + CONTENT_CACHE_TTL_MS,
       response,
     });
 
     return response;
   } catch (error) {
-    blogContentCache.delete(pageId);
+    blogContentCache.delete(cacheKey);
     throw error;
   }
 }

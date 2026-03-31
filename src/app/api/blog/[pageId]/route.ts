@@ -1,4 +1,4 @@
-import { getBlogContentByPageId } from "@/lib/notion-content-service";
+import { getPostByPageId } from "@/lib/blog-store";
 
 export const runtime = "nodejs";
 export const revalidate = 300;
@@ -10,13 +10,26 @@ type RouteProps = {
 export async function GET(_request: Request, { params }: RouteProps) {
   try {
     const { pageId } = await params;
-    const content = await getBlogContentByPageId(pageId.trim());
+    const post = await getPostByPageId(pageId.trim());
 
-    return Response.json(content, {
+    if (!post) {
+      return Response.json({ error: "Blog post not found." }, { status: 404 });
+    }
+
+    return Response.json(
+      {
+        pageId: post.notionPageId,
+        blocks: post.blocks,
+        wordCount: post.wordCount,
+        readingTime: post.readingTime,
+        generatedAt: post.generatedAt,
+      },
+      {
       headers: {
         "Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
       },
-    });
+      },
+    );
   } catch (error) {
     console.error("Blog content route error", error);
 
