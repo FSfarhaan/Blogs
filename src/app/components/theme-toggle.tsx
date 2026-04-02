@@ -103,7 +103,7 @@ export function ThemeToggle({ compact = false }: Props) {
         const updatedTheme: ThemeMode = theme === "dark" ? "light" : "dark";
         applyTheme(updatedTheme);
         emitThemeChange();
-
+        console.log("Daba to raha hu", updatedTheme);
         try {
           localStorage.setItem(themeStorageKey, updatedTheme);
         } catch {}

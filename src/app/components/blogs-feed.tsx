@@ -71,9 +71,9 @@ export function BlogsFeed({ initialPosts }: BlogsFeedProps) {
   }
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-6">
       
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_15rem_auto] lg:items-center">
+        <div className="grid gap-3 sm:gap-4 lg:grid-cols-[minmax(0,1fr)_15rem_auto] lg:items-center">
           <div className="relative">
             <input
               type="search"
@@ -108,7 +108,7 @@ export function BlogsFeed({ initialPosts }: BlogsFeedProps) {
           
         </div>
 
-        <p className="text-xs px-5 mt-8 font-medium text-[var(--muted)] text-left">
+        <p className="mt-2 px-1 text-left text-xs font-medium text-[var(--muted)]">
             Showing <span className="text-[var(--foreground)]">{filteredPosts.length}</span> posts
           </p>
       

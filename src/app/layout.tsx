@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { Footer } from "@/app/components/footer";
 import { Header } from "@/app/components/header";
 import { GoogleAnalytics } from "@/app/components/analytics/google-analytics";
@@ -40,6 +41,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: siteConfig.url,
   },
+  icons: {
+    icon: "/logos.png",
+    shortcut: "/logos.png",
+    apple: "/logos.png",
+  },
 };
 
 export default function RootLayout({
@@ -55,10 +61,12 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitializerScript }} />
-      </head>
       <body className="min-h-full bg-[var(--page-background)] text-[var(--foreground)]">
+        <Script
+          id="theme-initializer"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeInitializerScript }}
+        />
         <GoogleAnalytics />
         <SiteAnalyticsEvents />
         <div className="relative overflow-x-hidden">

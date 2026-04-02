@@ -1,4 +1,5 @@
 import { FieldValue } from "firebase-admin/firestore";
+import { sendWelcomeSubscriberEmail } from "@/lib/email";
 import { getSubscriberCount, getSubscribersCollection } from "@/lib/firebase";
 import { isValidEmail } from "@/lib/utils";
 
@@ -46,6 +47,12 @@ export async function POST(request: Request) {
       email,
       createdAt: FieldValue.serverTimestamp(),
     });
+
+    try {
+      await sendWelcomeSubscriberEmail({ email });
+    } catch (error) {
+      console.error("Welcome email error", error);
+    }
 
     return Response.json({
       message: "You are subscribed and will hear about the next post.",

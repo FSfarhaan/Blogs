@@ -27,5 +27,4 @@ export const categoryList = [
   "Practices",
   "Personal",
   "College",
-  "Opinions",
 ];

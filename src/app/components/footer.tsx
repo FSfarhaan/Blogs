@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/site-config";
 export function Footer() {
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--footer-surface)]">
-      <div className="mx-auto grid w-full max-w-[90%] gap-6 px-6 py-8 md:px-10 lg:grid-cols-[minmax(0,1fr)_31rem] lg:items-center">
+      <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_31rem] lg:px-8 lg:items-center">
         <div className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
             {siteConfig.shortName}

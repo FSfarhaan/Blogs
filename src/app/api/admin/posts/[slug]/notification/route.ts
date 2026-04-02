@@ -6,21 +6,6 @@ import { setPostEmailSent } from "@/lib/admin-posts";
 
 export const runtime = "nodejs";
 
-function getPreviewFromContent(options: {
-  fallback: string;
-  blocks: NonNullable<Awaited<ReturnType<typeof getPostBySlug>>>["blocks"];
-}) {
-  const firstReadableBlock = options.blocks.find(
-    (block) => block.type === "text" || block.type === "heading",
-  );
-
-  if (!firstReadableBlock) {
-    return options.fallback;
-  }
-
-  return firstReadableBlock.content;
-}
-
 type RouteProps = {
   params: Promise<{ slug: string }>;
 };
@@ -44,10 +29,7 @@ export async function POST(_request: Request, { params }: RouteProps) {
       recipients,
       post: {
         title: post.title,
-        description: getPreviewFromContent({
-          fallback: post.description,
-          blocks: post.blocks,
-        }),
+        description: post.description,
         slug: post.slug,
       },
     });

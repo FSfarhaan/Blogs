@@ -67,3 +67,7 @@ export async function getSubscriberCount() {
 
   return snapshot.size;
 }
+
+export async function deleteSubscriberByEmail(email: string) {
+  await getSubscribersCollection().doc(email.trim().toLowerCase()).delete();
+}

@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     if (!isAllowedAdminEmail(email)) {
       return Response.json(
-        { error: `Only ${ADMIN_EMAIL} can access this admin dashboard.` },
+        { error: `Incorrect credentials.` },
         { status: 403 },
       );
     }

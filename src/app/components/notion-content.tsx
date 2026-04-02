@@ -7,7 +7,7 @@ type Props = {
 
 export function NotionContent({ content }: Props) {
   return (
-    <div className="space-y-6 text-[1.0625rem] leading-8 text-[var(--foreground)]">
+    <div className="space-y-6 text-base leading-7 text-[var(--foreground)] md:text-[1.0625rem] md:leading-8">
       {content.blocks.map((block, index) => {
         const key = `${block.type}-${index}`;
 
@@ -60,7 +60,7 @@ export function NotionContent({ content }: Props) {
                 src={block.url}
                 alt={block.alt}
                 loading="lazy"
-                className="h-auto md:w-2/3 rounded-[1.75rem] border border-[var(--border)] object-cover shadow-[var(--shadow-soft)]"
+                className="h-auto w-full rounded-[1.75rem] border border-[var(--border)] object-cover shadow-[var(--shadow-soft)] lg:w-[78%]"
               />
               {block.caption ? (
                 <figcaption className="text-sm leading-6 text-[var(--muted)]">
@@ -96,7 +96,7 @@ export function NotionContent({ content }: Props) {
         return (
           <div
             key={key}
-            className="code-block overflow-x-auto rounded-[1.75rem] border border-[var(--border)] bg-[var(--code-surface)] px-5 py-4 text-sm text-[var(--foreground)] shadow-[var(--shadow-soft)] md:w-2/3"
+            className="code-block w-full overflow-x-auto rounded-[1.75rem] border border-[var(--border)] bg-[var(--code-surface)] px-5 py-4 text-sm text-[var(--foreground)] shadow-[var(--shadow-soft)] lg:w-[78%]"
           >
             <div className="mb-3 flex items-center justify-between gap-3">
               <p className="text-xs uppercase tracking-[0.18em] text-[var(--code-caption)]">

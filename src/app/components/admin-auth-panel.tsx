@@ -8,7 +8,7 @@ type AuthStep = "email" | "otp";
 
 export function AdminAuthPanel() {
   const router = useRouter();
-  const [email, setEmail] = useState(ADMIN_EMAIL);
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<AuthStep>("email");
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -96,9 +96,6 @@ export function AdminAuthPanel() {
         This page is reserved for one admin only. Enter your email, receive a one-time
         code, and we’ll keep you signed in for a while after verification.
       </p>
-      <p className="mt-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-pill)] px-4 py-3 text-sm font-medium text-[var(--foreground)]">
-        Accepted email: {ADMIN_EMAIL}
-      </p>
 
       {step === "email" ? (
         <form onSubmit={requestOtp} className="mt-8 space-y-4">
@@ -111,7 +108,7 @@ export function AdminAuthPanel() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               className="mt-3 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-input)] px-4 py-3 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-              placeholder={ADMIN_EMAIL}
+              placeholder={"Enter your email"}
               autoComplete="email"
             />
           </label>

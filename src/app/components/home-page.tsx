@@ -22,7 +22,7 @@ type SocialLink = {
 
 function CategoryArtwork({ category }: { category: string }) {
   const frameClassName =
-    "flex aspect-square w-full items-center justify-center rounded-[1.6rem] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-soft)]";
+    "flex aspect-square w-full items-center justify-center rounded-[1.6rem] border border-[var(--border)] bg-[var(--surface)] p-2 shadow-[var(--shadow-soft)]";
   const svgClassName = "h-full w-full";
 
   switch (category) {
@@ -66,7 +66,20 @@ function CategoryArtwork({ category }: { category: string }) {
           </svg>
         </div>
       );
+    case "Education":
+      return (
+        <div className={frameClassName}>
+          <svg aria-hidden="true" viewBox="0 0 120 120" className={svgClassName} fill="none">
+            <path d="M18 40L60 22L102 40L60 58L18 40Z" fill="var(--secondary-soft)" stroke="var(--secondary)" strokeWidth="4" strokeLinejoin="round" />
+            <path d="M31 48V73C31 82 47 90 60 90C73 90 89 82 89 73V48" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" strokeLinejoin="round" />
+            <path d="M102 40V66" stroke="var(--secondary)" strokeWidth="4.5" strokeLinecap="round" />
+            <circle cx="102" cy="74" r="7" fill="var(--accent)" />
+            <path d="M50 69H70" stroke="var(--foreground)" strokeWidth="5" strokeLinecap="round" />
+          </svg>
+        </div>
+      );
     case "Best Practices":
+    case "Practices":
       return (
         <div className={frameClassName}>
           <svg aria-hidden="true" viewBox="0 0 120 120" className={svgClassName} fill="none">
@@ -176,18 +189,15 @@ function CursorIcon() {
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 48 40"
-      className="h-10 w-12 -rotate-[10deg] drop-shadow-[0_10px_20px_rgba(22,18,15,0.2)]"
+      viewBox="0 0 60 64"
+      className="h-11 w-11 -rotate-[10deg] drop-shadow-[0_10px_20px_rgba(28,42,160,0.22)]"
       fill="none"
     >
       <path
-        d="M8.5 7.2C8.5 4.9 10.9 3.4 13 4.4L39.4 17.1C42.6 18.7 42.4 23.4 39.1 24.6L12.7 34.7C10.2 35.6 7.7 33.8 7.7 31.1L8.5 7.2Z"
-        fill="#ef6d73"
-      />
-      <path
-        d="M8.5 7.2C8.5 4.9 10.9 3.4 13 4.4L39.4 17.1C42.6 18.7 42.4 23.4 39.1 24.6L12.7 34.7C10.2 35.6 7.7 33.8 7.7 31.1L8.5 7.2Z"
-        stroke="white"
-        strokeWidth="3.6"
+        d="M8 6L52 34L28 36L18 58L8 6Z"
+        fill="#ffffff"
+        stroke="#ef6d43"
+        strokeWidth="3"
         strokeLinejoin="round"
       />
     </svg>
@@ -282,39 +292,24 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
     : "";
 
   return (
-    <main className="mx-auto flex w-full max-w-[90%] flex-col gap-10 px-6 py-8 md:px-10 md:py-10">
+    <main className="mx-auto flex w-full max-w-7xl flex-col gap-20 px-4 py-6 sm:px-6 lg:px-8 md:py-10">
       <section className="grid gap-7">
-        <div className="space-y-16">
-          <div className="rounded-[2.25rem] pb-8 md:pb-10">
-            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <div className="space-y-12 md:space-y-16">
+          <div className="rounded-[2.25rem] pb-6 md:pb-10">
+            <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
               <div className="max-w-3xl">
-                <div className="flex flex-wrap gap-3">
-                  {socialLinks.map((socialLink) => (
-                    <a
-                      key={socialLink.label}
-                      href={socialLink.href}
-                      title={socialLink.label}
-                      aria-label={socialLink.label}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-pill)] text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                    >
-                      {socialLink.icon}
-                    </a>
-                  ))}
-                </div>
 
                 <p className="mt-8 text-sm font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
                   Hi there,
                 </p>
-                <h1 className="max-w-5xl text-5xl font-semibold leading-[0.95] tracking-[-0.05em] text-[var(--foreground)] md:text-[4.5rem]">
-                  I am Farhaan Shaikh,
+                <h1 className="max-w-5xl text-4xl font-semibold leading-[0.95] tracking-[-0.05em] text-[var(--foreground)] sm:text-5xl lg:text-[4.5rem]">
+                  I am Farhaan,
                   <span className="block text-[var(--accent)]">
                     A Full Stack Dev.
                   </span>
                 </h1>
 
-                <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--muted)]">
+                <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)] sm:text-lg sm:leading-8">
                   {siteConfig.intro}
                 </p>
 
@@ -329,7 +324,7 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
                   />
                 </div>
 
-                <div className="mt-4 flex space-x-2">
+                <div className="mt-5 flex items-start gap-3">
                   <div className="flex -space-x-3">
                     <span className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--surface)] bg-[var(--surface-strong)] text-xs">
                       SK
@@ -351,18 +346,12 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
                 </div>
               </div>
 
-              <div className="mx-auto w-full max-w-xl lg:mx-0 lg:justify-self-end">
-                <div className="relative isolate min-h-[32rem] rounded-[2.8rem] ">
-                  <div className="absolute inset-0 rounded-[2.8rem] [background-image:radial-gradient(var(--border)_1px,transparent_1px)] [background-size:18px_18px] opacity-55" />
+              <div className="mx-auto w-full max-w-[22rem] sm:max-w-xl lg:mx-0 lg:justify-self-end">
+                <div className="relative isolate min-h-[25rem] rounded-[2.8rem] sm:min-h-[30rem] lg:min-h-[32rem]">
+                  <div className="absolute inset-0 rounded-[2.8rem] [background-image:radial-gradient(var(--border)_1px,transparent_1px)] [background-size:18px_18px] opacity-70" />
                   <div className="pointer-events-none absolute -left-8 top-16 h-40 w-40 rounded-full bg-[var(--accent-glow)] blur-3xl" />
                   <div className="pointer-events-none absolute bottom-8 right-8 h-44 w-44 rounded-full bg-[var(--secondary-soft)] blur-3xl" />
 
-                  {/* <div className="absolute left-2 top-6 z-20 rounded-[1.4rem] border border-[var(--border)] bg-[var(--surface-pill-strong)] p-3 shadow-[var(--shadow-soft)] sm:left-5">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-[1rem] bg-[var(--surface)]">
-                      
-                      <img src="/logo.png" alt="FS logo" className="h-7 w-7 object-contain" />
-                    </div>
-                  </div> */}
 
                   <div className="absolute -right-4 top-0 z-20 hidden flex-col gap-3 rounded-[1.6rem] border border-[var(--border)] bg-[var(--surface-pill-strong)] p-3 shadow-[var(--shadow-soft)] sm:flex">
                     {socialLinks.map((socialLink, index) => (
@@ -385,21 +374,21 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
                     ))}
                   </div>
 
-                  <div className="absolute bottom-12 right-0 z-20 w-[14.75rem] rounded-[1.2rem] border border-[var(--border)] bg-[var(--surface-pill-strong)] px-4 py-3 shadow-[var(--shadow-soft)] sm:right-4 sm:w-[16.5rem]">
+                  <div className="absolute bottom-8 right-0 z-20 w-[11.5rem] rounded-[1.2rem] border border-[var(--border)] bg-[var(--surface-pill-strong)] px-3 py-3 shadow-[var(--shadow-soft)] sm:bottom-12 sm:right-4 sm:w-[16.5rem] sm:px-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
                           Traffic
                         </p>
-                        <p className="mt-2 text-[1.9rem] font-semibold leading-none tracking-tight text-[var(--foreground)]">
+                        <p className="mt-2 text-[1.35rem] font-semibold leading-none tracking-tight text-[var(--foreground)] sm:text-[1.9rem]">
                           {trafficCountLabel} visits
                         </p>
-                        <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                        <p className="mt-1 text-[11px] leading-5 text-[var(--muted)] sm:text-xs">
                           since last month
                         </p>
                       </div>
                       {hasTrafficTrend ? (
-                        <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-[10px] font-semibold text-[#59B28A]">
+                        <span className="rounded-full bg-[var(--surface)] px-2 py-1 text-[9px] font-semibold text-[#59B28A] sm:px-2.5 sm:text-[10px]">
                           {trafficTrendLabel}
                         </span>
                       ) : null}
@@ -417,20 +406,20 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
                     </div> */}
                   </div>
 
-                  <div className="absolute left-2 top-6 sm:-left-10  z-20 rounded-[1.4rem] border border-[var(--border)] bg-[var(--surface-pill-strong)] px-5 py-4 shadow-[var(--shadow-soft)] ">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                  <div className="absolute left-0 -top-16 z-20 max-w-[10.5rem] rounded-[1.4rem] border border-[var(--border)] bg-[var(--surface-pill-strong)] px-4 py-3 shadow-[var(--shadow-soft)] sm:-left-10 sm:top-6 sm:max-w-none sm:px-5 sm:py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)] sm:text-xs">
                       Published now
                     </p>
-                    <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--foreground)]">
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
                       {posts.length}
                     </p>
-                    <p className="mt-1 text-sm text-[var(--muted)]">
+                    <p className="mt-1 text-xs text-[var(--muted)] sm:text-sm">
                       articles live on the site
                     </p>
                   </div>
 
-                  <div className="absolute left-2/3 top-[52%] z-20 -translate-x-1/2">
-                    <span className="pointer-events-none absolute -left-6 -top-5">
+                  <div className="absolute left-2/3 top-[52%] z-20 -translate-x-1/2 sm:block">
+                    <span className="pointer-events-none absolute -left-4 -top-2">
                       <CursorIcon />
                     </span>
                     <div className="rounded-full border border-[var(--border)] bg-[var(--surface-pill-strong)] px-4 py-2 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-soft)] mt-4">
@@ -438,7 +427,7 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
                     </div>
                   </div>
 
-                  <div className="relative mx-auto mt-10 max-w-[25rem] rounded-[2.3rem] border border-[var(--border)] [background:var(--hero-card-gradient)] p-4 shadow-[var(--shadow-soft)]">
+                  <div className="relative mx-auto mt-16 max-w-[18rem] rounded-[2.3rem] border border-[var(--border)] [background:var(--hero-card-gradient)] p-3 shadow-[var(--shadow-soft)] sm:mt-10 sm:max-w-[25rem] sm:p-4">
                     <div className="overflow-hidden rounded-[2rem] border border-[var(--border-strong)] bg-[var(--surface-strong)]">
                       {/* eslint-disable-next-line @next/next/no-img-element -- Local hero portrait is intentionally rendered as a simple image centerpiece for the editorial hero collage. */}
                       <img
@@ -453,23 +442,23 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
             </div>
           </div>
 
-          <section className="mt-16 rounded-[2rem] border border-[var(--border)] bg-[var(--feature-surface)] p-8 shadow-[var(--shadow-soft)]">
+          <section className="mt-12 rounded-[2rem] border border-[var(--border)] bg-[var(--feature-surface)] p-5 shadow-[var(--shadow-soft)] sm:p-6 md:mt-16 md:p-8">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
                 Categories
               </p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--foreground)]">
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
                 What I write about
               </h2>
             </div>
 
-            <div className="mt-4 grid gap-4 grid-cols-7">
+            <div className="mt-6 grid gap-3 grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-6">
               {categoryList.map((category) => (
-                <div key={category} className="rounded-[1.75rem] p-5 pb-0">
+                <div key={category} className="min-w-0 rounded-[1.5rem] p-2 pb-0 sm:rounded-[1.75rem] sm:p-4 sm:pb-0">
                   <div className="w-full overflow-hidden rounded-[1.6rem] ">
                     <CategoryArtwork category={category} />
                   </div>
-                  <p className="mt-4 text-lg font-semibold text-[var(--foreground)] text-center">
+                  <p className="mt-3 text-center text-xs font-semibold leading-snug text-[var(--foreground)] sm:mt-4 sm:text-base md:text-lg">
                     {category}
                   </p>
                   {/* <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
@@ -483,30 +472,30 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
       </section>
 
       <section id="latest-posts" className="rounded-[2.25rem]">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between p-8 px-0 pb-0">
+        <div className="mb-6 flex flex-col gap-4 px-0 pb-0 pt-0 md:mb-8 md:flex-row md:items-end md:justify-between md:p-8 md:px-0 md:pb-0">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
               Featured blogs
             </p>
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--foreground)]">
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--foreground)] md:text-4xl">
               If you&apos;re new, start here
             </h2>
           </div>
         </div>
 
         {primaryFeaturedPost ? (
-          <div className="grid gap-6 rounded-[2.3rem]  transition duration-300   xl:min-h-[44rem] xl:grid-cols-[minmax(0,1.12fr)_24rem] ">
+          <div className="grid gap-4 rounded-[2.3rem] transition duration-300 sm:gap-6 xl:min-h-[44rem] xl:grid-cols-[minmax(0,1.12fr)_24rem]">
             <Link href={`/blog/${primaryFeaturedPost.slug}`}
                 className="block"
               >
-            <article className="group flex h-full flex-col overflow-hidden bg-[var(--surface-strong)] rounded-[2.3rem] p-4 border border-[var(--border-strong)] transition duration-300 hover:-translate-y-1 border hover:border-[var(--accent)] hover:shadow-[var(--shadow-strong)] group [background:var(--feature-item-gradient)]">
+            <article className="group flex h-full flex-col overflow-hidden rounded-[2.3rem] border border-[var(--border-strong)] bg-[var(--surface-strong)] p-3 transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[var(--shadow-strong)] [background:var(--feature-item-gradient)] sm:p-4">
                 
                 <div className="relative overflow-hidden rounded-[1.8rem] border border-[var(--border-strong)] bg-[var(--surface-strong)]">
                   <PostCover
                     post={primaryFeaturedPost}
                     className="aspect-[16/10] w-full object-cover object-center transition duration-500 group-hover:scale-[1.03]"
                   />
-                  <div className="pointer-events-none absolute inset-x-4 top-4 flex items-center justify-between gap-3">
+                  <div className="pointer-events-none absolute inset-x-4 top-4 flex flex-wrap items-center justify-between gap-2">
                     <span className="rounded-full bg-[color:rgba(239,109,67,0.94)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white">
                       {primaryFeaturedPost.tags[0] ?? "Featured"}
                     </span>
@@ -517,8 +506,8 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
                 </div>
 
               
-              <div className="flex flex-1 flex-col justify-between space-y-5 px-2 pb-2 pt-6 md:px-4">
-                <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+              <div className="flex flex-1 flex-col justify-between space-y-4 px-1 pb-1 pt-5 sm:space-y-5 md:px-4">
+                <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)] sm:gap-3 sm:text-[11px]">
                   <span>{primaryFeaturedPost.author}</span>
                   <span className="h-1 w-1 rounded-full bg-[var(--muted)]" />
                   <span>
@@ -529,14 +518,14 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
                 </div>
 
                 <div>
-                  <h3 className="line-clamp-2 max-w-3xl text-3xl font-semibold leading-tight tracking-[-0.04em] text-[var(--foreground)] md:text-[2.65rem] group-hover:text-[var(--accent)]">
+                  <h3 className="line-clamp-2 max-w-3xl text-2xl font-semibold leading-tight tracking-[-0.04em] text-[var(--foreground)] group-hover:text-[var(--accent)] md:text-[2.65rem]">
                     <div
                       className="transition hover:text-[var(--accent)]"
                     >
                       {primaryFeaturedPost.title}
                     </div>
                   </h3>
-                  <p className="mt-4 line-clamp-3 max-w-2xl text-base leading-8 text-[var(--muted)] ">
+                  <p className="mt-4 line-clamp-3 max-w-2xl text-sm leading-7 text-[var(--muted)] md:text-base md:leading-8">
                     {primaryFeaturedPost.description}
                   </p>
                 </div>
@@ -557,7 +546,7 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
-                  className="group grid h-full grid-cols-[8.75rem_minmax(0,1fr)] gap-4 rounded-[1.9rem] border border-[var(--border)] [background:var(--feature-item-gradient)] p-3 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[var(--shadow-strong)]"
+                  className="group grid h-full grid-cols-[6.5rem_minmax(0,1fr)] gap-3 rounded-[1.6rem] border border-[var(--border)] [background:var(--feature-item-gradient)] p-2.5 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[var(--shadow-strong)] sm:grid-cols-[8.75rem_minmax(0,1fr)] sm:gap-4 sm:rounded-[1.9rem] sm:p-3"
                 >
                   <div className="h-full overflow-hidden rounded-[1.35rem] border border-[var(--border-strong)] bg-[var(--surface-strong)]">
                     <PostCover
@@ -592,29 +581,37 @@ export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
       </section>
 
       <section className="rounded-[2.25rem] md:p-10 md:px-0">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
               Discover more
             </p>
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--foreground)]">
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--foreground)] md:text-4xl">
               More from the blogs
             </h2>
           </div>
           <Link
             href="/blogs"
-            className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-5 py-2.5 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            className="hidden items-center rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-5 py-2.5 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] md:inline-flex"
           >
             View more
           </Link>
         </div>
 
         {discoverPosts.length ? (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {discoverPosts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {discoverPosts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+            <Link
+              href="/blogs"
+              className="mt-6 inline-flex items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-5 py-2.5 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] md:hidden"
+            >
+              View more
+            </Link>
+          </>
         ) : (
           <EmptyState
             title="Nothing in the archive yet"

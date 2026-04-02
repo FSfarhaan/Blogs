@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NotionContent } from "@/app/components/notion-content";
 import { PostCard } from "@/app/components/post-card";
-import { getPostBySlug, getPublishedPosts, getRelatedPosts } from "@/lib/blog-store";
+import { getPostBySlug, getRelatedPosts } from "@/lib/blog-store";
 import { formatDate, getTagTone } from "@/lib/utils";
 
 type PageProps = {
@@ -11,18 +11,23 @@ type PageProps = {
 };
 
 export const revalidate = 900;
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  const posts = await getPublishedPosts();
+  return [];
+}
 
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+function normalizeSlug(slug: string) {
+  try {
+    return decodeURIComponent(slug).trim().replace(/^\/+|\/+$/g, "");
+  } catch {
+    return slug.trim().replace(/^\/+|\/+$/g, "");
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const post = await getPostBySlug(normalizeSlug(slug));
 
   if (!post) {
     return {
@@ -65,7 +70,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const post = await getPostBySlug(normalizeSlug(slug));
 
   if (!post) {
     notFound();
@@ -78,15 +83,15 @@ export default async function BlogPostPage({ params }: PageProps) {
   });
 
   return (
-    <main className="mx-auto w-full max-w-[90%] px-6 py-8 md:px-10 md:py-10">
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_18rem]">
+    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 md:py-10 pt-0">
+      <div className="grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-8">
         <article className="min-w-0">
-          <div className="rounded-[2.25rem] border border-[var(--border)]  p-8 shadow-[var(--shadow-soft)] md:p-10">
+          <div className="rounded-[2rem] sm:p-4 sm:pt-0 md:rounded-[2.25rem]">
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/"
                 aria-label="Go back to blogs"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-pill)] text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                className="inline-flex h-10 w-10 pb-1 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-pill)] text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] md:h-11 md:w-11"
               >
                 <span aria-hidden="true">←</span>
               </Link>
@@ -98,18 +103,18 @@ export default async function BlogPostPage({ params }: PageProps) {
               </Link>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+            {/* <div className="mt-6 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)] sm:gap-3 sm:text-xs">
               <span>{formatDate(post.publishedAt)}</span>
               <span className="h-1 w-1 rounded-full bg-[var(--muted)]" />
               <span>{post.author}</span>
               <span className="h-1 w-1 rounded-full bg-[var(--muted)]" />
               <span>{post.readingTime}</span>
-            </div>
+            </div> */}
 
-            <h1 className="mt-5 max-w-4xl text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-6xl">
+            <h1 className="mt-5 max-w-4xl text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl lg:text-6xl">
               {post.title}
             </h1>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--muted)] md:text-lg">
+            <p className="mt-5 max-w-3xl text-sm leading-7 text-[var(--muted)] sm:text-base md:text-lg md:leading-8">
               {post.description}
             </p>
 
@@ -124,7 +129,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             ) : null} */}
 
           
-            <div className="">
+            <div className="mt-8">
               <NotionContent
                 content={{
                   pageId: post.notionPageId,
@@ -140,8 +145,8 @@ export default async function BlogPostPage({ params }: PageProps) {
 
         </article>
 
-        <aside className="custom-scrollbar space-y-6 xl:sticky xl:top-6  xl:overflow-y-auto xl:pr-1">
-          <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 ">
+        <aside className="custom-scrollbar space-y-5 xl:sticky xl:top-6 xl:overflow-y-auto xl:pr-1">
+          <div className="rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] p-5 sm:rounded-[2rem] sm:p-6">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
               Post details
             </p>

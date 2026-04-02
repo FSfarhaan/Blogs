@@ -78,7 +78,7 @@ export function PostCard({ post, priority = "default" }: Props) {
               </div>
             )}
 
-            <div className="pointer-events-none absolute inset-x-3 top-3 flex items-center justify-between gap-3">
+            <div className="pointer-events-none absolute inset-x-3 top-3 flex flex-wrap items-center justify-between gap-2">
               <span className="rounded-full bg-[color:rgba(239,109,67,0.94)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
                 {post.tags[0] ?? "Post"}
               </span>

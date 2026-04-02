@@ -1,10 +1,10 @@
 export type ThemeMode = "light" | "dark";
 
-export const defaultTheme: ThemeMode = "light";
+export const defaultTheme: ThemeMode = "dark";
 export const themeStorageKey = "fs-theme";
 
 export function normalizeTheme(theme: string | null | undefined): ThemeMode {
-  return theme === "dark" ? "dark" : defaultTheme;
+  return theme === "dark" ? "dark" : "light";
 }
 
 export const themeInitializerScript = `(() => {

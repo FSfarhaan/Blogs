@@ -122,6 +122,14 @@ function decodeCursor(cursor?: string | null): DecodedCursor | null {
   }
 }
 
+function normalizeStoredSlug(slug: string) {
+  try {
+    return decodeURIComponent(slug).trim().replace(/^\/+|\/+$/g, "");
+  } catch {
+    return slug.trim().replace(/^\/+|\/+$/g, "");
+  }
+}
+
 async function queryStoredPosts(options?: {
   cursor?: string;
   limit?: number;
@@ -222,7 +230,16 @@ const getCachedPostBySlug = unstable_cache(
 );
 
 export const getPostBySlug = cache(async (slug: string) => {
-  return getCachedPostBySlug(slug);
+  const normalizedSlug = normalizeStoredSlug(slug);
+  const normalizedLowerSlug = normalizedSlug.toLowerCase();
+
+  const post = await getCachedPostBySlug(normalizedSlug);
+
+  if (post || normalizedLowerSlug === normalizedSlug) {
+    return post;
+  }
+
+  return getCachedPostBySlug(normalizedLowerSlug);
 });
 
 export const getPostByPageId = cache(async (pageId: string) => {
