@@ -1,26 +1,47 @@
-import Link from "next/link";
-import { navigationLinks, siteConfig } from "@/lib/site-config";
+import { SubscribeForm } from "@/app/components/subscribe-form";
+import { siteConfig } from "@/lib/site-config";
 
 export function Footer() {
   return (
-    <footer className="border-t border-[var(--border)] bg-[color:rgba(255,250,244,0.72)]">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-10 text-sm text-[var(--muted)] md:flex-row md:items-center md:justify-between md:px-10">
-        <div>
-          <p className="font-semibold text-[var(--foreground)]">{siteConfig.name}</p>
-          <p className="mt-1 max-w-xl leading-7">{siteConfig.description}</p>
+    <footer className="border-t border-[var(--border)] bg-[var(--footer-surface)]">
+      <div className="mx-auto grid w-full max-w-[90%] gap-6 px-6 py-8 md:px-10 lg:grid-cols-[minmax(0,1fr)_31rem] lg:items-center">
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+            {siteConfig.shortName}
+          </p>
+          <h2 className="max-w-xl text-xl font-semibold tracking-tight text-[var(--foreground)] md:text-2xl">
+            Notes on building, shipping, and learning in public.
+          </h2>
+          <p className="max-w-xl text-sm leading-6 text-[var(--muted)]">
+            Essays, experiments, and honest lessons from the work behind this blog.
+          </p>
         </div>
 
-        <nav className="flex flex-wrap gap-4">
-          {navigationLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="transition hover:text-[var(--foreground)]"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <section
+          id="subscribe"
+        >
+          {/* <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+            Newsletter
+          </p> */}
+          <h3 className="mt-1.5 text-lg font-semibold tracking-tight text-[var(--foreground)]">
+            New posts, no noise.
+          </h3>
+          <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">
+            One short email when something new is published.
+          </p>
+
+          <div className="mt-3">
+            <SubscribeForm
+              compact
+              placeholder="Enter your email"
+              buttonLabel="Subscribe"
+              idleMessage="No spam. Only new posts."
+              className="space-y-3"
+              inputClassName="h-10 text-xs"
+              buttonClassName="h-10 px-4 text-xs"
+            />
+          </div>
+        </section>
       </div>
     </footer>
   );

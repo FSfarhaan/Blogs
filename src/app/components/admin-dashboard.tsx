@@ -171,7 +171,7 @@ export function AdminDashboard({ initialPosts, initialSyncStatus }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-[2rem] border border-[var(--border)] bg-[linear-gradient(145deg,rgba(255,250,244,0.98),rgba(250,240,231,0.94))] p-8 shadow-[var(--shadow-soft)] md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-4 rounded-[2rem] border border-[var(--border)] [background:var(--admin-gradient)] p-8 shadow-[var(--shadow-soft)] md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
             Admin dashboard
@@ -184,13 +184,13 @@ export function AdminDashboard({ initialPosts, initialSyncStatus }: Props) {
             been announced.
           </p>
           <div className="mt-5 flex flex-wrap gap-3 text-sm text-[var(--muted)]">
-            <span className="rounded-full border border-[var(--border)] bg-white/70 px-4 py-2">
+            <span className="rounded-full border border-[var(--border)] bg-[var(--surface-pill)] px-4 py-2">
               Notion posts: <span className="font-semibold text-[var(--foreground)]">{syncStatus.notionCount}</span>
             </span>
-            <span className="rounded-full border border-[var(--border)] bg-white/70 px-4 py-2">
+            <span className="rounded-full border border-[var(--border)] bg-[var(--surface-pill)] px-4 py-2">
               Synced in Mongo: <span className="font-semibold text-[var(--foreground)]">{syncStatus.syncedCount}</span>
             </span>
-            <span className="rounded-full border border-[var(--border)] bg-white/70 px-4 py-2">
+            <span className="rounded-full border border-[var(--border)] bg-[var(--surface-pill)] px-4 py-2">
               Out of date: <span className="font-semibold text-[var(--foreground)]">{syncStatus.staleCount}</span>
             </span>
           </div>
@@ -213,7 +213,7 @@ export function AdminDashboard({ initialPosts, initialSyncStatus }: Props) {
             type="button"
             onClick={logout}
             disabled={isLoggingOut}
-            className="inline-flex items-center rounded-full border border-[var(--border)] bg-white px-5 py-2.5 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface-input)] px-5 py-2.5 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoggingOut ? "Signing out..." : "Sign out"}
           </button>
@@ -227,7 +227,7 @@ export function AdminDashboard({ initialPosts, initialSyncStatus }: Props) {
       ) : null}
 
       {error ? (
-        <p className="rounded-2xl border border-[color:rgba(208,77,46,0.18)] bg-[color:rgba(208,77,46,0.08)] px-4 py-3 text-sm font-medium text-[color:#a33d24]">
+        <p className="rounded-2xl border border-[var(--error-border)] bg-[var(--error-bg)] px-4 py-3 text-sm font-medium text-[var(--error-text)]">
           {error}
         </p>
       ) : null}
@@ -235,7 +235,7 @@ export function AdminDashboard({ initialPosts, initialSyncStatus }: Props) {
       <div className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-soft)]">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-[var(--border)]">
-            <thead className="bg-[color:rgba(255,250,244,0.86)]">
+            <thead className="bg-[var(--table-head-surface)]">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
                   Title
@@ -274,8 +274,8 @@ export function AdminDashboard({ initialPosts, initialSyncStatus }: Props) {
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${
                           post.emailSent
-                            ? "bg-[color:rgba(53,137,88,0.14)] text-[color:#246b45]"
-                            : "bg-[color:rgba(107,91,210,0.12)] text-[color:#5848bb]"
+                            ? "bg-[var(--success-bg)] text-[var(--success-text)]"
+                            : "bg-[var(--secondary-badge-bg)] text-[var(--secondary-badge-text)]"
                         }`}
                       >
                         {String(post.emailSent)}
@@ -287,7 +287,7 @@ export function AdminDashboard({ initialPosts, initialSyncStatus }: Props) {
                           href={`/blog/${post.slug}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                          className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface-input)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
                         >
                           Open post
                         </a>
@@ -305,7 +305,7 @@ export function AdminDashboard({ initialPosts, initialSyncStatus }: Props) {
                             type="button"
                             disabled={isBusy}
                             onClick={() => setEmailStatus(post.slug, false)}
-                            className="inline-flex items-center rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface-input)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             {isBusy ? "Updating..." : "Mark unsent"}
                           </button>

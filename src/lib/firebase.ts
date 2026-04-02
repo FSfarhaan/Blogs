@@ -61,3 +61,9 @@ export async function getSubscriberEmails() {
     .filter((email): email is string => typeof email === "string")
     .map((email) => email.trim().toLowerCase());
 }
+
+export async function getSubscriberCount() {
+  const snapshot = await getSubscribersCollection().get();
+
+  return snapshot.size;
+}

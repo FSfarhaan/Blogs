@@ -15,7 +15,7 @@ export function SubscribeSection({
   return (
     <section
       id="subscribe"
-      className={`rounded-[2rem] border border-[var(--border)] bg-[linear-gradient(135deg,#fff7f0,#f8dfd2_45%,#f6efff)] ${
+      className={`rounded-[2rem] border border-[var(--border)] [background:var(--subscribe-gradient)] ${
         compact ? "p-6" : "p-8 md:p-10"
       } shadow-[var(--shadow-soft)]`}
     >

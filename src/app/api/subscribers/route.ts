@@ -1,14 +1,14 @@
 import { FieldValue } from "firebase-admin/firestore";
-import { getSubscriberEmails, getSubscribersCollection } from "@/lib/firebase";
+import { getSubscriberCount, getSubscribersCollection } from "@/lib/firebase";
 import { isValidEmail } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const emails = await getSubscriberEmails();
+    const count = await getSubscriberCount();
 
-    return Response.json({ emails });
+    return Response.json({ count });
   } catch (error) {
     console.error("Subscribers fetch error", error);
 

@@ -3,9 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NotionContent } from "@/app/components/notion-content";
 import { PostCard } from "@/app/components/post-card";
-import { SubscribeSection } from "@/app/components/subscribe-section";
 import { getPostBySlug, getPublishedPosts, getRelatedPosts } from "@/lib/blog-store";
-import { formatDate } from "@/lib/utils";
+import { formatDate, getTagTone } from "@/lib/utils";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -82,13 +81,22 @@ export default async function BlogPostPage({ params }: PageProps) {
     <main className="mx-auto w-full max-w-[90%] px-6 py-8 md:px-10 md:py-10">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_18rem]">
         <article className="min-w-0">
-          <div className="rounded-[2.25rem] border border-[var(--border)] bg-[linear-gradient(140deg,rgba(255,255,255,0.97),rgba(255,245,235,0.9),rgba(242,239,255,0.86))] p-8 shadow-[var(--shadow-soft)] md:p-10">
-            <Link
-              href="/"
-              className="inline-flex text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
-            >
-              Back to blogs
-            </Link>
+          <div className="rounded-[2.25rem] border border-[var(--border)]  p-8 shadow-[var(--shadow-soft)] md:p-10">
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/"
+                aria-label="Go back to blogs"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-pill)] text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              >
+                <span aria-hidden="true">←</span>
+              </Link>
+              <Link
+                href="/"
+                className="inline-flex text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)] transition hover:text-[var(--accent)]"
+              >
+                Back to blogs
+              </Link>
+            </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
               <span>{formatDate(post.publishedAt)}</span>
@@ -106,7 +114,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             </p>
 
             {/* {heroImage ? (
-              <div className="mt-8 overflow-hidden rounded-[2rem] border border-white/70">
+              <div className="mt-8 overflow-hidden rounded-[2rem] border border-[var(--border-strong)]">
                 <img
                   src={heroImage}
                   alt={post.title}
@@ -130,12 +138,6 @@ export default async function BlogPostPage({ params }: PageProps) {
           
           </div>
 
-          <div className="mt-8">
-            <SubscribeSection
-              title="Enjoyed the read?"
-              description="Subscribe to get the next post as soon as it is published from Notion."
-            />
-          </div>
         </article>
 
         <aside className="custom-scrollbar space-y-6 xl:sticky xl:top-6  xl:overflow-y-auto xl:pr-1">
@@ -162,7 +164,8 @@ export default async function BlogPostPage({ params }: PageProps) {
                   {(post.tags.length ? post.tags : ["Article"]).map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-[var(--border)] bg-white px-3 py-1 text-xs font-medium"
+                      className="rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.04em]"
+                      style={getTagTone(tag)}
                     >
                       {tag}
                     </span>

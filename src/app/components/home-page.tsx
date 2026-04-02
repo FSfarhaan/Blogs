@@ -1,17 +1,237 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { EmptyState } from "@/app/components/empty-state";
 import { PostCard } from "@/app/components/post-card";
-import { SubscribeSection } from "@/app/components/subscribe-section";
+import { SubscribeForm } from "@/app/components/subscribe-form";
 import type { BlogPostSummary } from "@/lib/blog";
+import type { SiteAnalyticsSummary } from "@/lib/site-analytics";
 import { categoryList, siteConfig } from "@/lib/site-config";
 import { formatDate } from "@/lib/utils";
 
 type Props = {
   posts: BlogPostSummary[];
+  subscriberCount: number;
+  analyticsSummary: SiteAnalyticsSummary;
 };
+
+type SocialLink = {
+  href: string;
+  label: string;
+  icon: ReactNode;
+};
+
+function CategoryArtwork({ category }: { category: string }) {
+  const frameClassName =
+    "flex aspect-square w-full items-center justify-center rounded-[1.6rem] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-soft)]";
+  const svgClassName = "h-full w-full";
+
+  switch (category) {
+    case "Software":
+      return (
+        <div className={frameClassName}>
+          <svg aria-hidden="true" viewBox="0 0 120 120" className={svgClassName} fill="none">
+            <rect x="18" y="24" width="84" height="58" rx="12" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" />
+            <path d="M47 47L34 58L47 69" stroke="var(--accent)" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M73 47L86 58L73 69" stroke="var(--accent)" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M66 40L55 76" stroke="var(--secondary)" strokeWidth="7" strokeLinecap="round" />
+            <rect x="38" y="91" width="44" height="8" rx="4" fill="var(--accent-glow)" />
+          </svg>
+        </div>
+      );
+    case "Architecture":
+      return (
+        <div className={frameClassName}>
+          <svg aria-hidden="true" viewBox="0 0 120 120" className={svgClassName} fill="none">
+            <rect x="18" y="22" width="34" height="34" rx="8" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" />
+            <rect x="68" y="22" width="34" height="20" rx="8" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" />
+            <rect x="68" y="56" width="34" height="34" rx="8" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" />
+            <rect x="18" y="70" width="34" height="20" rx="8" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" />
+            <path d="M52 39H68" stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" />
+            <path d="M35 56V70" stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" />
+            <path d="M85 42V56" stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" />
+          </svg>
+        </div>
+      );
+    case "AI":
+      return (
+        <div className={frameClassName}>
+          <svg aria-hidden="true" viewBox="0 0 120 120" className={svgClassName} fill="none">
+            <rect x="31" y="22" width="58" height="72" rx="18" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" />
+            <circle cx="46" cy="43" r="7" fill="var(--secondary)" />
+            <circle cx="74" cy="43" r="7" fill="var(--secondary)" />
+            <path d="M46 43H74" stroke="var(--secondary)" strokeWidth="5" strokeLinecap="round" />
+            <path d="M46 43L60 60L74 43" stroke="var(--accent)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M43 76C48 69 54 66 60 66C66 66 72 69 77 76" stroke="var(--foreground)" strokeWidth="5" strokeLinecap="round" />
+            <path d="M60 13V22M39 17L43 24M81 17L77 24" stroke="var(--accent)" strokeWidth="5" strokeLinecap="round" />
+          </svg>
+        </div>
+      );
+    case "Best Practices":
+      return (
+        <div className={frameClassName}>
+          <svg aria-hidden="true" viewBox="0 0 120 120" className={svgClassName} fill="none">
+            <rect x="28" y="16" width="64" height="88" rx="14" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" />
+            <path d="M42 44L48 50L58 37" stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M42 64L48 70L58 57" stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M42 84L48 90L58 77" stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M68 44H79" stroke="var(--foreground)" strokeWidth="5" strokeLinecap="round" />
+            <path d="M68 64H79" stroke="var(--foreground)" strokeWidth="5" strokeLinecap="round" />
+            <path d="M68 84H79" stroke="var(--foreground)" strokeWidth="5" strokeLinecap="round" />
+          </svg>
+        </div>
+      );
+    case "Personal":
+      return (
+        <div className={frameClassName}>
+          <svg aria-hidden="true" viewBox="0 0 120 120" className={svgClassName} fill="none">
+            <path d="M26 33C26 25.82 31.82 20 39 20H81C88.18 20 94 25.82 94 33V66C94 73.18 88.18 79 81 79H56L41 93V79H39C31.82 79 26 73.18 26 66V33Z" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" strokeLinejoin="round" />
+            <path d="M42 42H78" stroke="var(--foreground)" strokeWidth="5" strokeLinecap="round" />
+            <path d="M42 54H73" stroke="var(--foreground)" strokeWidth="5" strokeLinecap="round" />
+            <path d="M42 66H64" stroke="var(--accent)" strokeWidth="5" strokeLinecap="round" />
+            <circle cx="84" cy="88" r="10" fill="var(--secondary-soft)" />
+            <path d="M84 84V92M80 88H88" stroke="var(--secondary)" strokeWidth="4.5" strokeLinecap="round" />
+          </svg>
+        </div>
+      );
+    case "College":
+      return (
+        <div className={frameClassName}>
+          <svg aria-hidden="true" viewBox="0 0 120 120" className={svgClassName} fill="none">
+            <path d="M18 42L60 24L102 42L60 60L18 42Z" fill="var(--secondary-soft)" stroke="var(--secondary)" strokeWidth="4" strokeLinejoin="round" />
+            <path d="M33 50V72C33 81 49 88 60 88C71 88 87 81 87 72V50" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" strokeLinejoin="round" />
+            <path d="M102 42V67" stroke="var(--secondary)" strokeWidth="4.5" strokeLinecap="round" />
+            <circle cx="102" cy="76" r="7" fill="var(--accent)" />
+          </svg>
+        </div>
+      );
+    case "Opinions":
+      return (
+        <div className={frameClassName}>
+          <svg aria-hidden="true" viewBox="0 0 120 120" className={svgClassName} fill="none">
+            <path d="M20 32C20 24.27 26.27 18 34 18H68C75.73 18 82 24.27 82 32V58C82 65.73 75.73 72 68 72H46L34 82V72C26.27 72 20 65.73 20 58V32Z" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" strokeLinejoin="round" />
+            <path d="M58 84H86C93.73 84 100 77.73 100 70V50C100 42.27 93.73 36 86 36H82" stroke="var(--secondary)" strokeWidth="4" strokeLinecap="round" />
+            <circle cx="41" cy="45" r="5" fill="var(--accent)" />
+            <circle cx="52" cy="45" r="5" fill="var(--secondary)" />
+            <circle cx="63" cy="45" r="5" fill="#59B28A" />
+          </svg>
+        </div>
+      );
+    default:
+      return (
+        <div className={frameClassName}>
+          <svg aria-hidden="true" viewBox="0 0 120 120" className={svgClassName} fill="none">
+            <circle cx="60" cy="60" r="26" fill="var(--surface-muted)" stroke="var(--border)" strokeWidth="4" />
+            <path d="M60 47V73M47 60H73" stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" />
+          </svg>
+        </div>
+      );
+  }
+}
+
+function GlobeIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3a14.5 14.5 0 0 1 0 18M12 3a14.5 14.5 0 0 0 0 18" />
+    </svg>
+  );
+}
+
+function LinkedInIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+      <path d="M6.94 8.5H3.56V20h3.38V8.5ZM5.25 3A1.97 1.97 0 1 0 5.3 6.94 1.97 1.97 0 0 0 5.25 3Zm14.7 9.88c0-3.47-1.85-5.08-4.32-5.08a3.72 3.72 0 0 0-3.36 1.85V8.5H8.9c.04.76 0 11.5 0 11.5h3.38v-6.42c0-.34.02-.68.12-.92.27-.68.89-1.38 1.93-1.38 1.36 0 1.9 1.04 1.9 2.56V20h3.38v-7.12Z" />
+    </svg>
+  );
+}
+
+function GitHubIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+      <path d="M12 .5a12 12 0 0 0-3.8 23.39c.6.1.82-.26.82-.58v-2.04c-3.34.72-4.04-1.42-4.04-1.42-.54-1.4-1.33-1.76-1.33-1.76-1.08-.75.08-.73.08-.73 1.2.09 1.82 1.22 1.82 1.22 1.06 1.82 2.8 1.3 3.48 1 .1-.77.42-1.3.76-1.6-2.67-.31-5.47-1.34-5.47-5.95 0-1.32.46-2.39 1.22-3.23-.13-.3-.53-1.53.11-3.18 0 0 1-.32 3.27 1.23a11.2 11.2 0 0 1 5.95 0c2.27-1.55 3.26-1.23 3.26-1.23.64 1.65.24 2.88.12 3.18.76.84 1.22 1.9 1.22 3.23 0 4.62-2.8 5.63-5.48 5.94.44.38.82 1.12.82 2.28v3.36c0 .32.22.69.83.57A12 12 0 0 0 12 .5Z" />
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="m4.5 7 7.5 6L19.5 7" />
+    </svg>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function CursorIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 48 40"
+      className="h-10 w-12 -rotate-[10deg] drop-shadow-[0_10px_20px_rgba(22,18,15,0.2)]"
+      fill="none"
+    >
+      <path
+        d="M8.5 7.2C8.5 4.9 10.9 3.4 13 4.4L39.4 17.1C42.6 18.7 42.4 23.4 39.1 24.6L12.7 34.7C10.2 35.6 7.7 33.8 7.7 31.1L8.5 7.2Z"
+        fill="#ef6d73"
+      />
+      <path
+        d="M8.5 7.2C8.5 4.9 10.9 3.4 13 4.4L39.4 17.1C42.6 18.7 42.4 23.4 39.1 24.6L12.7 34.7C10.2 35.6 7.7 33.8 7.7 31.1L8.5 7.2Z"
+        stroke="white"
+        strokeWidth="3.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+const socialLinks: SocialLink[] = [
+  {
+    href: "https://www.farhaanshaikh.dev",
+    label: "Portfolio",
+    icon: <GlobeIcon />,
+  },
+  {
+    href: "https://www.linkedin.com/in/fsfarhaanshaikh",
+    label: "LinkedIn",
+    icon: <LinkedInIcon />,
+  },
+  {
+    href: "https://github.com/FSfarhaan",
+    label: "GitHub",
+    icon: <GitHubIcon />,
+  },
+  {
+    href: "mailto:fsfarhaanshaikh7@gmail.com",
+    label: "Email",
+    icon: <MailIcon />,
+  },
+  {
+    href: "http://instagram.com/the_farhaanshaikh",
+    label: "Instagram",
+    icon: <InstagramIcon />,
+  },
+];
 
 function getDisplayImage(post: BlogPostSummary) {
   return post.thumbnailImage ?? post.coverImage;
+}
+
+function formatTrafficCount(value: number) {
+  if (value >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(value >= 10_000_000 ? 0 : 1)}M`;
+  }
+
+  return value.toLocaleString();
 }
 
 function PostCover({
@@ -32,44 +252,61 @@ function PostCover({
 
   return (
     <div
-      className={`${className} flex items-end bg-[linear-gradient(145deg,#fff4ea,#fde1d4_48%,#efe7ff)] p-4`}
+      className={`${className} flex items-end [background:var(--placeholder-gradient)] p-4`}
     >
-      <span className="rounded-full border border-white/80 bg-white/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+      <span className="rounded-full border border-[var(--border-strong)] bg-[var(--surface-pill)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
         {post.tags[0] ?? "Latest"}
       </span>
     </div>
   );
 }
 
-export function HomePage({ posts }: Props) {
+export function HomePage({ posts, subscriberCount, analyticsSummary }: Props) {
   const featuredPool = posts.filter((post) => post.featured);
   const fallbackPool = posts.filter((post) => !post.featured);
   const featuredPosts = [...featuredPool, ...fallbackPool].slice(0, 5);
   const discoverPosts = posts
-    .filter((post) => !featuredPosts.some((featuredPost) => featuredPost.id === post.id))
+    .filter(
+      (post) =>
+        !featuredPosts.some((featuredPost) => featuredPost.id === post.id),
+    )
     .slice(0, 6);
   const primaryFeaturedPost = featuredPosts[0];
   const secondaryFeaturedPosts = featuredPosts.slice(1, 5);
-  const categoryImages = [
-    "/category-technology.svg",
-    "/category-lifestyle.svg",
-    "/category-arts.svg",
-    "/category-design.svg",
-    "/category-entertainment.svg",
-    "/category-education.svg",
-  ];
+  const subscriberCountLabel =
+    subscriberCount > 0 ? subscriberCount.toLocaleString() : "100+";
+  const trafficCountLabel = formatTrafficCount(analyticsSummary.totalPageViews);
+  const hasTrafficTrend = analyticsSummary?.weeklyTrafficChange !== null;
+  const trafficTrendLabel = hasTrafficTrend
+    ? `${analyticsSummary.weeklyTrafficChange >= 0 ? "+" : ""}${analyticsSummary.weeklyTrafficChange}% this week`
+    : "";
 
   return (
     <main className="mx-auto flex w-full max-w-[90%] flex-col gap-10 px-6 py-8 md:px-10 md:py-10">
       <section className="grid gap-7">
-        <div className="space-y-8">
-          <div className="rounded-[2.25rem] p-8 md:p-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
-              Hi there,
-            </p>
+        <div className="space-y-16">
+          <div className="rounded-[2.25rem] pb-8 md:pb-10">
+            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              <div className="max-w-3xl">
+                <div className="flex flex-wrap gap-3">
+                  {socialLinks.map((socialLink) => (
+                    <a
+                      key={socialLink.label}
+                      href={socialLink.href}
+                      title={socialLink.label}
+                      aria-label={socialLink.label}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-pill)] text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                    >
+                      {socialLink.icon}
+                    </a>
+                  ))}
+                </div>
 
-            <div className="mt-6 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-              <div>
+                <p className="mt-8 text-sm font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
+                  Hi there,
+                </p>
                 <h1 className="max-w-5xl text-5xl font-semibold leading-[0.95] tracking-[-0.05em] text-[var(--foreground)] md:text-[4.5rem]">
                   I am Farhaan Shaikh,
                   <span className="block text-[var(--accent)]">
@@ -77,55 +314,146 @@ export function HomePage({ posts }: Props) {
                   </span>
                 </h1>
 
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--muted)]">
+                <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--muted)]">
                   {siteConfig.intro}
                 </p>
 
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Link
-                    href="#latest-posts"
-                    className="inline-flex items-center rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-dark)]"
-                  >
-                    Start reading
-                  </Link>
-                  <Link
-                    href="#subscribe"
-                    className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                  >
-                    Join the newsletter
-                  </Link>
+                <div className="mt-6">
+                  <SubscribeForm
+                    compact
+                    placeholder="Enter your email for newsletter"
+                    buttonLabel="Subscribe"
+                    idleMessage="Drop your email to get the next article first."
+                    inputClassName="h-[3.25rem] bg-[var(--surface)]"
+                    buttonClassName="h-[3.25rem] px-6"
+                  />
+                </div>
+
+                <div className="mt-4 flex space-x-2">
+                  <div className="flex -space-x-3">
+                    <span className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--surface)] bg-[var(--surface-strong)] text-xs">
+                      SK
+                    </span>
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-[var(--surface)] bg-[linear-gradient(135deg,var(--accent),#ffb26f)] text-xs font-semibold text-white">
+                      SR
+                    </span>
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-[var(--surface)] bg-[linear-gradient(135deg,var(--secondary),#8dc8ff)] text-xs font-semibold text-white">
+                      AS
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium leading-6 text-[var(--foreground)]"> Join <span className="font-semibold">{subscriberCountLabel}+</span> subscribers.
+                    </p>
+                    <p className="text-sm text-[var(--muted)]">
+                      To receive notifications whenever a new post goes live.
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="mx-auto w-full max-w-md lg:mx-0 lg:justify-self-end">
-                <div className="relative overflow-hidden rounded-[2.35rem] border border-[var(--border)] bg-[linear-gradient(155deg,rgba(255,250,244,0.96),rgba(247,235,225,0.92))] p-4 shadow-[var(--shadow-soft)]">
-                  <div className="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full bg-[color:rgba(239,109,67,0.16)] blur-3xl" />
-                  <div className="pointer-events-none absolute -bottom-10 -left-8 h-40 w-40 rounded-full bg-[color:rgba(107,91,210,0.12)] blur-3xl" />
+              <div className="mx-auto w-full max-w-xl lg:mx-0 lg:justify-self-end">
+                <div className="relative isolate min-h-[32rem] rounded-[2.8rem] ">
+                  <div className="absolute inset-0 rounded-[2.8rem] [background-image:radial-gradient(var(--border)_1px,transparent_1px)] [background-size:18px_18px] opacity-55" />
+                  <div className="pointer-events-none absolute -left-8 top-16 h-40 w-40 rounded-full bg-[var(--accent-glow)] blur-3xl" />
+                  <div className="pointer-events-none absolute bottom-8 right-8 h-44 w-44 rounded-full bg-[var(--secondary-soft)] blur-3xl" />
 
-                  <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[var(--surface-strong)]">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- Local hero portrait is intentionally rendered as a simple cropped image for this editorial card. */}
-                    <img
-                      src="/pfp.jpeg"
-                      alt={`${siteConfig.author} portrait`}
-                      className="aspect-[4/5] w-full object-cover object-center"
-                    />
+                  {/* <div className="absolute left-2 top-6 z-20 rounded-[1.4rem] border border-[var(--border)] bg-[var(--surface-pill-strong)] p-3 shadow-[var(--shadow-soft)] sm:left-5">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-[1rem] bg-[var(--surface)]">
+                      
+                      <img src="/logo.png" alt="FS logo" className="h-7 w-7 object-contain" />
+                    </div>
+                  </div> */}
+
+                  <div className="absolute -right-4 top-0 z-20 hidden flex-col gap-3 rounded-[1.6rem] border border-[var(--border)] bg-[var(--surface-pill-strong)] p-3 shadow-[var(--shadow-soft)] sm:flex">
+                    {socialLinks.map((socialLink, index) => (
+                      <a
+                        key={`${socialLink.label}-rail`}
+                        href={socialLink.href}
+                        title={socialLink.label}
+                        aria-label={socialLink.label}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`group relative inline-flex h-10 w-10 items-center justify-center rounded-[1rem] bg-[var(--surface)] text-[var(--foreground)] transition hover:scale-[1.03] hover:text-[var(--accent)] ${
+                          index === 0 ? "text-[var(--accent)]" : ""
+                        }`}
+                      >
+                        {socialLink.icon}
+                        <span className="pointer-events-none absolute right-[calc(100%+0.75rem)] top-1/2 -translate-y-1/2 rounded-full border border-[var(--border)] bg-[var(--surface-pill-strong)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground)] opacity-0 transition duration-200 group-hover:opacity-100">
+                          {socialLink.label}
+                        </span>
+                      </a>
+                    ))}
                   </div>
 
-                  <div className="relative mt-4 rounded-[1.5rem] border border-white/70 bg-white/72 px-5 py-4 backdrop-blur">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
-                      I am {siteConfig.author}
+                  <div className="absolute bottom-12 right-0 z-20 w-[14.75rem] rounded-[1.2rem] border border-[var(--border)] bg-[var(--surface-pill-strong)] px-4 py-3 shadow-[var(--shadow-soft)] sm:right-4 sm:w-[16.5rem]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                          Traffic
+                        </p>
+                        <p className="mt-2 text-[1.9rem] font-semibold leading-none tracking-tight text-[var(--foreground)]">
+                          {trafficCountLabel} visits
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                          since last month
+                        </p>
+                      </div>
+                      {hasTrafficTrend ? (
+                        <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-[10px] font-semibold text-[#59B28A]">
+                          {trafficTrendLabel}
+                        </span>
+                      ) : null}
+                    </div>
+                    {/* <div className="mt-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                        Reading time
+                      </p>
+                      <p className="mt-1.5 text-base font-semibold text-[var(--foreground)]">
+                        {totalReadingTimeLabel}
+                      </p>
+                      <p className="mt-1 text-[11px] leading-5 text-[var(--muted)]">
+                        readers spent on-site
+                      </p>
+                    </div> */}
+                  </div>
+
+                  <div className="absolute left-2 top-6 sm:-left-10  z-20 rounded-[1.4rem] border border-[var(--border)] bg-[var(--surface-pill-strong)] px-5 py-4 shadow-[var(--shadow-soft)] ">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                      Published now
                     </p>
-                    <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                      Building polished web experiences, writing about the systems behind
-                      them, and publishing the whole thing straight from Notion.
+                    <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--foreground)]">
+                      {posts.length}
                     </p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">
+                      articles live on the site
+                    </p>
+                  </div>
+
+                  <div className="absolute left-2/3 top-[52%] z-20 -translate-x-1/2">
+                    <span className="pointer-events-none absolute -left-6 -top-5">
+                      <CursorIcon />
+                    </span>
+                    <div className="rounded-full border border-[var(--border)] bg-[var(--surface-pill-strong)] px-4 py-2 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-soft)] mt-4">
+                      Focussed
+                    </div>
+                  </div>
+
+                  <div className="relative mx-auto mt-10 max-w-[25rem] rounded-[2.3rem] border border-[var(--border)] [background:var(--hero-card-gradient)] p-4 shadow-[var(--shadow-soft)]">
+                    <div className="overflow-hidden rounded-[2rem] border border-[var(--border-strong)] bg-[var(--surface-strong)]">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- Local hero portrait is intentionally rendered as a simple image centerpiece for the editorial hero collage. */}
+                      <img
+                        src="/pfp.jpeg"
+                        alt={`${siteConfig.author} portrait`}
+                        className="aspect-[4/4.3] w-full object-cover object-center"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <section className="rounded-[2rem] border border-[var(--border)] bg-[color:rgba(255,250,244,0.88)] p-8 shadow-[var(--shadow-soft)] mt-16">
+          <section className="mt-16 rounded-[2rem] border border-[var(--border)] bg-[var(--feature-surface)] p-8 shadow-[var(--shadow-soft)]">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
                 Categories
@@ -135,19 +463,11 @@ export function HomePage({ posts }: Props) {
               </h2>
             </div>
 
-            <div className="mt-8 grid gap-4 grid-cols-7">
-              {categoryList.map((category, index) => (
-                <div
-                  key={category}
-                  className="rounded-[1.75rem]  p-5"
-                >
+            <div className="mt-4 grid gap-4 grid-cols-7">
+              {categoryList.map((category) => (
+                <div key={category} className="rounded-[1.75rem] p-5 pb-0">
                   <div className="w-full overflow-hidden rounded-[1.6rem] ">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- These are local placeholder category images that will be swapped later, and a simple img keeps the card interior easy to replace. */}
-                    <img
-                      src={categoryImages[index % categoryImages.length]}
-                      alt={`${category} placeholder`}
-                      className="aspect-square w-full object-cover"
-                    />
+                    <CategoryArtwork category={category} />
                   </div>
                   <p className="mt-4 text-lg font-semibold text-[var(--foreground)] text-center">
                     {category}
@@ -163,7 +483,7 @@ export function HomePage({ posts }: Props) {
       </section>
 
       <section id="latest-posts" className="rounded-[2.25rem]">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between p-8 pb-0">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between p-8 px-0 pb-0">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
               Featured blogs
@@ -175,10 +495,13 @@ export function HomePage({ posts }: Props) {
         </div>
 
         {primaryFeaturedPost ? (
-          <div className="grid gap-6 rounded-[2.3rem] border border-[var(--border)] bg-[color:rgba(255,250,244,0.88)] p-4 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-strong)] xl:min-h-[44rem] xl:grid-cols-[minmax(0,1.12fr)_24rem]">
-            <article className="group flex h-full flex-col overflow-hidden">
-              <Link href={`/blog/${primaryFeaturedPost.slug}`} className="block">
-                <div className="relative overflow-hidden rounded-[1.8rem] border border-white/75 bg-[var(--surface-strong)]">
+          <div className="grid gap-6 rounded-[2.3rem]  transition duration-300   xl:min-h-[44rem] xl:grid-cols-[minmax(0,1.12fr)_24rem] ">
+            <Link href={`/blog/${primaryFeaturedPost.slug}`}
+                className="block"
+              >
+            <article className="group flex h-full flex-col overflow-hidden bg-[var(--surface-strong)] rounded-[2.3rem] p-4 border border-[var(--border-strong)] transition duration-300 hover:-translate-y-1 border hover:border-[var(--accent)] hover:shadow-[var(--shadow-strong)] group [background:var(--feature-item-gradient)]">
+                
+                <div className="relative overflow-hidden rounded-[1.8rem] border border-[var(--border-strong)] bg-[var(--surface-strong)]">
                   <PostCover
                     post={primaryFeaturedPost}
                     className="aspect-[16/10] w-full object-cover object-center transition duration-500 group-hover:scale-[1.03]"
@@ -187,13 +510,13 @@ export function HomePage({ posts }: Props) {
                     <span className="rounded-full bg-[color:rgba(239,109,67,0.94)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white">
                       {primaryFeaturedPost.tags[0] ?? "Featured"}
                     </span>
-                    <span className="rounded-full border border-white/70 bg-white/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                    <span className="rounded-full border border-[var(--border-strong)] bg-[var(--surface-pill-strong)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
                       {formatDate(primaryFeaturedPost.publishedAt)}
                     </span>
                   </div>
                 </div>
-              </Link>
 
+              
               <div className="flex flex-1 flex-col justify-between space-y-5 px-2 pb-2 pt-6 md:px-4">
                 <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
                   <span>{primaryFeaturedPost.author}</span>
@@ -206,37 +529,37 @@ export function HomePage({ posts }: Props) {
                 </div>
 
                 <div>
-                  <h3 className="line-clamp-2 max-w-3xl text-3xl font-semibold leading-tight tracking-[-0.04em] text-[var(--foreground)] md:text-[2.65rem]">
-                    <Link
-                      href={`/blog/${primaryFeaturedPost.slug}`}
+                  <h3 className="line-clamp-2 max-w-3xl text-3xl font-semibold leading-tight tracking-[-0.04em] text-[var(--foreground)] md:text-[2.65rem] group-hover:text-[var(--accent)]">
+                    <div
                       className="transition hover:text-[var(--accent)]"
                     >
                       {primaryFeaturedPost.title}
-                    </Link>
+                    </div>
                   </h3>
-                  <p className="mt-4 line-clamp-3 max-w-2xl text-base leading-8 text-[var(--muted)]">
+                  <p className="mt-4 line-clamp-3 max-w-2xl text-base leading-8 text-[var(--muted)] ">
                     {primaryFeaturedPost.description}
                   </p>
                 </div>
 
-                <Link
-                  href={`/blog/${primaryFeaturedPost.slug}`}
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--foreground)] transition hover:text-[var(--accent)]"
+                <div
+                  
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--foreground)] transition group-hover:text-[var(--accent)]"
                 >
-                  Continue reading
+                  View article
                   <span aria-hidden="true">→</span>
-                </Link>
+                </div>
               </div>
             </article>
+            </Link>
 
             <div className="grid gap-4 xl:h-full xl:grid-rows-4">
               {secondaryFeaturedPosts.map((post) => (
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
-                  className="group grid h-full grid-cols-[8.75rem_minmax(0,1fr)] gap-4 rounded-[1.9rem] border border-[var(--border)] bg-[linear-gradient(165deg,rgba(255,251,246,0.94),rgba(248,239,229,0.9))] p-3 shadow-[0_12px_28px_rgba(88,62,41,0.05)] transition duration-300 hover:-translate-y-1 hover:border-[color:rgba(239,109,67,0.24)] hover:shadow-[var(--shadow-soft)]"
+                  className="group grid h-full grid-cols-[8.75rem_minmax(0,1fr)] gap-4 rounded-[1.9rem] border border-[var(--border)] [background:var(--feature-item-gradient)] p-3 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[var(--shadow-strong)]"
                 >
-                  <div className="h-full overflow-hidden rounded-[1.35rem] border border-white/70 bg-[var(--surface-strong)]">
+                  <div className="h-full overflow-hidden rounded-[1.35rem] border border-[var(--border-strong)] bg-[var(--surface-strong)]">
                     <PostCover
                       post={post}
                       className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.04]"
@@ -268,7 +591,7 @@ export function HomePage({ posts }: Props) {
         )}
       </section>
 
-      <section className="rounded-[2.25rem] md:p-10">
+      <section className="rounded-[2.25rem] md:p-10 md:px-0">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
@@ -299,8 +622,6 @@ export function HomePage({ posts }: Props) {
           />
         )}
       </section>
-
-      <SubscribeSection />
     </main>
   );
 }

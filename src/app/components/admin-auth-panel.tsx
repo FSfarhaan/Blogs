@@ -85,7 +85,7 @@ export function AdminAuthPanel() {
   }
 
   return (
-    <div className="mx-auto max-w-xl rounded-[2rem] border border-[var(--border)] bg-[linear-gradient(145deg,rgba(255,250,244,0.98),rgba(250,240,231,0.94))] p-8 shadow-[var(--shadow-soft)] md:p-10">
+    <div className="mx-auto max-w-xl rounded-[2rem] border border-[var(--border)] [background:var(--admin-gradient)] p-8 shadow-[var(--shadow-soft)] md:p-10">
       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
         Admin access
       </p>
@@ -96,7 +96,7 @@ export function AdminAuthPanel() {
         This page is reserved for one admin only. Enter your email, receive a one-time
         code, and we’ll keep you signed in for a while after verification.
       </p>
-      <p className="mt-3 rounded-2xl border border-[var(--border)] bg-white/70 px-4 py-3 text-sm font-medium text-[var(--foreground)]">
+      <p className="mt-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-pill)] px-4 py-3 text-sm font-medium text-[var(--foreground)]">
         Accepted email: {ADMIN_EMAIL}
       </p>
 
@@ -110,7 +110,7 @@ export function AdminAuthPanel() {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="mt-3 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+              className="mt-3 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-input)] px-4 py-3 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
               placeholder={ADMIN_EMAIL}
               autoComplete="email"
             />
@@ -135,7 +135,7 @@ export function AdminAuthPanel() {
               inputMode="numeric"
               value={otp}
               onChange={(event) => setOtp(event.target.value)}
-              className="mt-3 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-base tracking-[0.28em] text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+              className="mt-3 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-input)] px-4 py-3 text-base tracking-[0.28em] text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
               placeholder="123456"
               autoComplete="one-time-code"
             />
@@ -157,7 +157,7 @@ export function AdminAuthPanel() {
                 setError(null);
                 setFeedback(null);
               }}
-              className="inline-flex items-center rounded-full border border-[var(--border)] bg-white px-6 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface-input)] px-6 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
             >
               Change email
             </button>
@@ -172,7 +172,7 @@ export function AdminAuthPanel() {
       ) : null}
 
       {error ? (
-        <p className="mt-5 rounded-2xl border border-[color:rgba(208,77,46,0.18)] bg-[color:rgba(208,77,46,0.08)] px-4 py-3 text-sm font-medium text-[color:#a33d24]">
+        <p className="mt-5 rounded-2xl border border-[var(--error-border)] bg-[var(--error-bg)] px-4 py-3 text-sm font-medium text-[var(--error-text)]">
           {error}
         </p>
       ) : null}

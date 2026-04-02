@@ -1,110 +1,67 @@
 "use client";
 
-import { startTransition, useEffect, useRef, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { EmptyState } from "@/app/components/empty-state";
 import { PostCard } from "@/app/components/post-card";
 import type { BlogPostSummary } from "@/lib/blog";
 
 type BlogsFeedProps = {
   initialPosts: BlogPostSummary[];
-  initialNextCursor: string | null;
-  initialHasMore: boolean;
-  pageSize?: number;
 };
 
-type BlogsPageResponse = {
-  posts: BlogPostSummary[];
-  nextCursor: string | null;
-  hasMore: boolean;
-};
+export function BlogsFeed({ initialPosts }: BlogsFeedProps) {
+  const [query, setQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All categories");
+  const deferredQuery = useDeferredValue(query);
 
-export function BlogsFeed({
-  initialPosts,
-  initialNextCursor,
-  initialHasMore,
-  pageSize = 6,
-}: BlogsFeedProps) {
-  const [posts, setPosts] = useState(initialPosts);
-  const [nextCursor, setNextCursor] = useState(initialNextCursor);
-  const [hasMore, setHasMore] = useState(initialHasMore);
-  const [isLoading, setIsLoading] = useState(false);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<string, number>();
 
-  useEffect(() => {
-    setPosts(initialPosts);
-    setNextCursor(initialNextCursor);
-    setHasMore(initialHasMore);
-    setIsLoading(false);
-  }, [initialHasMore, initialNextCursor, initialPosts]);
+    initialPosts.forEach((post) => {
+      post.tags.forEach((tag) => {
+        const normalizedTag = tag.trim();
 
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-
-    if (!sentinel || !hasMore) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-
-        if (!entry?.isIntersecting || isLoading || !hasMore) {
+        if (!normalizedTag) {
           return;
         }
 
-        const loadMorePosts = async () => {
-          setIsLoading(true);
+        counts.set(normalizedTag, (counts.get(normalizedTag) ?? 0) + 1);
+      });
+    });
 
-          try {
-            const params = new URLSearchParams({
-              limit: String(pageSize),
-            });
+    return [...counts.entries()].sort((left, right) => left[0].localeCompare(right[0]));
+  }, [initialPosts]);
 
-            if (nextCursor) {
-              params.set("cursor", nextCursor);
-            }
+  const filteredPosts = useMemo(() => {
+    const normalizedQuery = deferredQuery.trim().toLowerCase();
 
-            const response = await fetch(`/api/blogs?${params.toString()}`, {
-              cache: "no-store",
-            });
+    return initialPosts.filter((post) => {
+      const matchesCategory =
+        selectedCategory === "All categories" ||
+        post.tags.some((tag) => tag.trim() === selectedCategory);
 
-            if (!response.ok) {
-              throw new Error("Failed to fetch more posts");
-            }
+      if (!matchesCategory) {
+        return false;
+      }
 
-            const data = (await response.json()) as BlogsPageResponse;
+      if (!normalizedQuery) {
+        return true;
+      }
 
-            startTransition(() => {
-              setPosts((currentPosts) => {
-                const knownIds = new Set(currentPosts.map((post) => post.id));
-                const newPosts = data.posts.filter((post) => !knownIds.has(post.id));
-                return [...currentPosts, ...newPosts];
-              });
-              setNextCursor(data.nextCursor);
-              setHasMore(data.hasMore);
-            });
-          } catch (error) {
-            console.error("Unable to load more blog posts", error);
-          } finally {
-            setIsLoading(false);
-          }
-        };
+      const haystack = [
+        post.title,
+        post.description,
+        post.author,
+        ...post.tags,
+      ]
+        .join(" ")
+        .toLowerCase();
 
-        void loadMorePosts();
-      },
-      {
-        rootMargin: "720px 0px 240px",
-      },
-    );
+      return haystack.includes(normalizedQuery);
+    });
+  }, [deferredQuery, initialPosts, selectedCategory]);
 
-    observer.observe(sentinel);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [hasMore, isLoading, nextCursor, pageSize]);
-
-  if (!posts.length) {
+  if (!initialPosts.length) {
     return (
       <EmptyState
         title="No published blogs yet"
@@ -114,30 +71,60 @@ export function BlogsFeed({
   }
 
   return (
-    <section className="space-y-8">
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
-      </div>
-
-      <div ref={sentinelRef} aria-hidden="true" className="h-4 w-full" />
-
-      {isLoading ? (
-        <div className="flex justify-center">
-          <div className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-5 py-2 text-sm font-medium text-[var(--muted)] shadow-[var(--shadow-soft)]">
-            Loading more posts...
+    <section className="space-y-4">
+      
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_15rem_auto] lg:items-center">
+          <div className="relative">
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search posts by title, topic, or keyword"
+              className="h-12 w-full rounded-full border border-[var(--border)] bg-[var(--surface-input)] px-5 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+            />
+            
           </div>
-        </div>
-      ) : null}
 
-      {!hasMore ? (
-        <div className="flex justify-center">
-          <p className="text-sm leading-7 text-[var(--muted)]">
-            You have reached the end of the archive.
-          </p>
+          <div className="relative">
+            <select
+              value={selectedCategory}
+              onChange={(event) => setSelectedCategory(event.target.value)}
+              className="h-12 w-full appearance-none rounded-full border border-[var(--border)] bg-[var(--surface-input)] px-5 text-sm font-medium text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+            >
+              <option value="All categories">
+                All categories ({initialPosts.length})
+              </option>
+              {categoryCounts.map(([category, count]) => (
+                <option key={category} value={category}>
+                  {category} ({count})
+                </option>
+              ))}
+            </select>
+            <span className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)]">
+              v
+            </span>
+          </div>
+              
+          
         </div>
-      ) : null}
+
+        <p className="text-xs px-5 mt-8 font-medium text-[var(--muted)] text-left">
+            Showing <span className="text-[var(--foreground)]">{filteredPosts.length}</span> posts
+          </p>
+      
+
+      {filteredPosts.length ? (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {filteredPosts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="No posts match that search"
+          description="Try a different keyword or switch back to all categories."
+        />
+      )}
     </section>
   );
 }

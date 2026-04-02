@@ -96,14 +96,14 @@ export function NotionContent({ content }: Props) {
         return (
           <div
             key={key}
-            className="code-block overflow-x-auto rounded-[1.75rem] border border-[var(--border)] bg-[#181412] px-5 py-4 text-sm text-[#f7efe7] shadow-[var(--shadow-soft)] md:w-2/3"
+            className="code-block overflow-x-auto rounded-[1.75rem] border border-[var(--border)] bg-[var(--code-surface)] px-5 py-4 text-sm text-[var(--foreground)] shadow-[var(--shadow-soft)] md:w-2/3"
           >
             <div className="mb-3 flex items-center justify-between gap-3">
-              <p className="text-xs uppercase tracking-[0.18em] text-[#d3b8a4]">
+              <p className="text-xs uppercase tracking-[0.18em] text-[var(--code-caption)]">
                 {block.language}
               </p>
               {block.caption ? (
-                <p className="text-right text-xs uppercase tracking-[0.18em] text-[#8c7666]">
+                <p className="text-right text-xs uppercase tracking-[0.18em] text-[var(--code-muted)]">
                   {block.caption}
                 </p>
               ) : null}

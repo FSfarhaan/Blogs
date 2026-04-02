@@ -3,7 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/app/components/footer";
 import { Header } from "@/app/components/header";
 import { GoogleAnalytics } from "@/app/components/analytics/google-analytics";
+import { SiteAnalyticsEvents } from "@/app/components/analytics/site-analytics-events";
 import { siteConfig } from "@/lib/site-config";
+import { themeInitializerScript } from "@/lib/theme";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -49,12 +51,18 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
+      data-theme="light"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitializerScript }} />
+      </head>
       <body className="min-h-full bg-[var(--page-background)] text-[var(--foreground)]">
         <GoogleAnalytics />
+        <SiteAnalyticsEvents />
         <div className="relative overflow-x-hidden">
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-full bg-[radial-gradient(circle_at_top_left,rgba(239,109,67,0.18),transparent_38%),radial-gradient(circle_at_top_right,rgba(107,91,210,0.1),transparent_32%),linear-gradient(180deg,#fffaf4_0%,#f2e6db_52%,#f5eadf_100%)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-full [background:var(--shell-overlay)]" />
           <Header />
           {children}
           <Footer />
